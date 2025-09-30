@@ -1,0 +1,97 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'clickhouse-dwh'
+    environment: 'production'
+
+# Alertmanager configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Rule files for alerts
+rule_files:
+  - "alerts/*.yml"
+
+scrape_configs:
+  # ==================== ClickHouse Nodes ====================
+  - job_name: 'clickhouse-01'
+    static_configs:
+      - targets: ['clickhouse-01:9363']
+        labels:
+          instance: 'clickhouse-01'
+          role: 'etl-primary'
+          shard: '01'
+          replica: 'replica_01'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  - job_name: 'clickhouse-02'
+    static_configs:
+      - targets: ['clickhouse-02:9363']
+        labels:
+          instance: 'clickhouse-02'
+          role: 'analytics-reports'
+          shard: '01'
+          replica: 'replica_02'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  - job_name: 'clickhouse-03'
+    static_configs:
+      - targets: ['clickhouse-03:9363']
+        labels:
+          instance: 'clickhouse-03'
+          role: 'analytics-reports'
+          shard: '01'
+          replica: 'replica_03'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # ==================== HAProxy Stats ====================
+  - job_name: 'haproxy'
+    static_configs:
+      - targets: ['haproxy:8404']
+        labels:
+          instance: 'haproxy-lb'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ==================== ZooKeeper Monitoring ====================
+  - job_name: 'zookeeper'
+    static_configs:
+      - targets:
+        - 'zookeeper-01:7071'
+        - 'zookeeper-02:7071'
+        - 'zookeeper-03:7071'
+        labels:
+          service: 'zookeeper'
+    scrape_interval: 15s
+
+  # ==================== Prometheus Self-Monitoring ====================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          instance: 'prometheus'
+
+# ==================== Recording Rules ====================
+# Создайте файл alerts/clickhouse.yml со следующими правилами:
+# groups:
+#   - name: clickhouse_recording_rules
+#     interval: 30s
+#     rules:
+#       - record: clickhouse:queries_per_second
+#         expr: rate(ClickHouseProfileEvents_Query[1m])
+#
+#       - record: clickhouse:insert_rows_per_second
+#         expr: rate(ClickHouseProfileEvents_InsertedRows[1m])
+#
+#       - record: clickhouse:memory_usage_percent
+#         expr: (ClickHouseMetrics_MemoryTracking / ClickHouseAsyncMetrics_MaxPartCountForPartition) * 100

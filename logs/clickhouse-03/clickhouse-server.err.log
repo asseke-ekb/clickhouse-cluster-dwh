@@ -1,0 +1,253 @@
+2025.09.30 15:16:58.832684 [ 59 ] {} <Error> Application: Code: 137. DB::Exception: A setting 'max_threads' appeared at top level in config /etc/clickhouse-server/config.xml. But it is user-level setting that should be located in users.xml inside <profiles> section for specific profile. You can add it to <profiles><default> if you want to change default value of this setting. You can also disable the check - specify <skip_check_for_incorrect_settings>1</skip_check_for_incorrect_settings> in the main configuration file. (UNKNOWN_ELEMENT_IN_CONFIG), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String const&, String const&>(int, FormatStringHelperImpl<std::type_identity<String const&>::type, std::type_identity<String const&>::type>, String const&, String const&) @ 0x000000000766121d
+2. DB::Settings::checkNoSettingNamesAtTopLevel(Poco::Util::AbstractConfiguration const&, String const&) @ 0x000000000fb420a2
+3. DB::Server::main(std::vector<String, std::allocator<String>> const&) @ 0x000000000ca22f2a
+4. Poco::Util::Application::run() @ 0x000000001499f706
+5. DB::Server::run() @ 0x000000000ca1ec11
+6. Poco::Util::ServerApplication::run(int, char**) @ 0x00000000149a85b9
+7. mainEntryClickHouseServer(int, char**) @ 0x000000000ca1aa0a
+8. main @ 0x0000000007656578
+9. ? @ 0x00007f72d26c2083
+10. _start @ 0x0000000005de262e
+ (version 24.3.18.7 (official build))
+2025.09.30 15:26:08.387225 [ 59 ] {} <Warning> Context: Linux transparent hugepages are set to "always". Check /sys/kernel/mm/transparent_hugepage/enabled
+2025.09.30 15:26:08.387792 [ 59 ] {} <Warning> Context: Delay accounting is not enabled, OSIOWaitMicroseconds will not be gathered. You can enable it using `echo 1 > /proc/sys/kernel/task_delayacct` or by using sysctl.
+2025.09.30 15:26:08.618864 [ 59 ] {} <Warning> Access(local_directory): File /var/lib/clickhouse/access/users.list doesn't exist
+2025.09.30 15:26:08.619191 [ 59 ] {} <Warning> Access(local_directory): Recovering lists in directory /var/lib/clickhouse/access/
+2025.09.30 15:26:10.953420 [ 1 ] {} <Warning> Context: Linux transparent hugepages are set to "always". Check /sys/kernel/mm/transparent_hugepage/enabled
+2025.09.30 15:26:10.954580 [ 1 ] {} <Warning> Context: Delay accounting is not enabled, OSIOWaitMicroseconds will not be gathered. You can enable it using `echo 1 > /proc/sys/kernel/task_delayacct` or by using sysctl.
+2025.09.30 15:51:28.389391 [ 473 ] {815611ce-ffaa-46a7-870e-a2faa1c7f0fb} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000004 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'c2739568-f5b8-4a99-9e48-50da2b4c9793' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+
+2025.09.30 15:51:28.390075 [ 473 ] {815611ce-ffaa-46a7-870e-a2faa1c7f0fb} <Error> DDLWorker: Query /* ddl_entry=query-0000000004 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'c2739568-f5b8-4a99-9e48-50da2b4c9793' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:51:36.844691 [ 473 ] {bc8d377e-47f8-4b8c-b498-0588c0baa1d7} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000005 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'ad8669ff-1a15-4308-bb35-eabc637a86cc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+
+2025.09.30 15:51:36.845168 [ 473 ] {bc8d377e-47f8-4b8c-b498-0588c0baa1d7} <Error> DDLWorker: Query /* ddl_entry=query-0000000005 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'ad8669ff-1a15-4308-bb35-eabc637a86cc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:52:07.572659 [ 473 ] {bd78f20b-09e2-4b85-8a03-4e3b2315bac9} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000006 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID '74784f13-4549-491c-83d9-5a40788c91dc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime64(3), `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+
+2025.09.30 15:52:07.573362 [ 473 ] {bd78f20b-09e2-4b85-8a03-4e3b2315bac9} <Error> DDLWorker: Query /* ddl_entry=query-0000000006 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID '74784f13-4549-491c-83d9-5a40788c91dc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime64(3), `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:52:53.906252 [ 324 ] {} <Warning> stage0.orders_raw (f87b21bb-d797-426c-a073-cac328033e63): Log pointer of source replica replica_01 changed while we loading queue nodes. Will retry.
+2025.09.30 15:52:58.267174 [ 344 ] {} <Warning> stage1.`.inner_id.7758e2f0-8542-4a40-b203-ea11a1f71a2b` (51e02938-c344-4807-9dba-2d623097935c): Log pointer of source replica replica_02 changed while we loading queue nodes. Will retry.
+2025.09.30 15:54:06.803460 [ 335 ] {} <Warning> stage2.`.inner_id.20d8930f-b2dd-4a98-843e-2b25a42461a6` (f028ed82-0bd8-4219-ac1f-388eeccd414a): Log pointer of source replica replica_02 changed while we loading queue nodes. Will retry.
+2025.09.30 15:54:57.537230 [ 2087 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007fedbf978609
+14. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:06:29.610402 [ 2489 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 107, Net Exception: Socket is not connected, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498e292
+1. Poco::Net::SocketImpl::peerAddress() @ 0x00000000149908f6
+2. DB::HTTPServerRequest::HTTPServerRequest(std::shared_ptr<DB::IHTTPContext>, DB::HTTPServerResponse&, Poco::Net::HTTPServerSession&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000012064709
+3. DB::HTTPServerConnection::run() @ 0x0000000012062e68
+4. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+5. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+6. Poco::PooledThread::run() @ 0x0000000014a8bf81
+7. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+8. ? @ 0x00007fedbf978609
+9. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:06:34.608924 [ 2087 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 107, Net Exception: Socket is not connected, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498e292
+1. Poco::Net::SocketImpl::peerAddress() @ 0x00000000149908f6
+2. DB::HTTPServerRequest::HTTPServerRequest(std::shared_ptr<DB::IHTTPContext>, DB::HTTPServerResponse&, Poco::Net::HTTPServerSession&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000012064709
+3. DB::HTTPServerConnection::run() @ 0x0000000012062e68
+4. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+5. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+6. Poco::PooledThread::run() @ 0x0000000014a8bf81
+7. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+8. ? @ 0x00007fedbf978609
+9. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:09:17.207833 [ 2489 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007fedbf978609
+14. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:12:20.855426 [ 2489 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007fedbf978609
+14. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:16:21.749147 [ 2489 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007fedbf978609
+14. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))

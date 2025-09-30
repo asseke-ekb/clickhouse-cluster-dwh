@@ -1,0 +1,303 @@
+2025.09.30 15:16:58.686110 [ 59 ] {} <Error> Application: Code: 137. DB::Exception: A setting 'max_threads' appeared at top level in config /etc/clickhouse-server/config.xml. But it is user-level setting that should be located in users.xml inside <profiles> section for specific profile. You can add it to <profiles><default> if you want to change default value of this setting. You can also disable the check - specify <skip_check_for_incorrect_settings>1</skip_check_for_incorrect_settings> in the main configuration file. (UNKNOWN_ELEMENT_IN_CONFIG), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String const&, String const&>(int, FormatStringHelperImpl<std::type_identity<String const&>::type, std::type_identity<String const&>::type>, String const&, String const&) @ 0x000000000766121d
+2. DB::Settings::checkNoSettingNamesAtTopLevel(Poco::Util::AbstractConfiguration const&, String const&) @ 0x000000000fb420a2
+3. DB::Server::main(std::vector<String, std::allocator<String>> const&) @ 0x000000000ca22f2a
+4. Poco::Util::Application::run() @ 0x000000001499f706
+5. DB::Server::run() @ 0x000000000ca1ec11
+6. Poco::Util::ServerApplication::run(int, char**) @ 0x00000000149a85b9
+7. mainEntryClickHouseServer(int, char**) @ 0x000000000ca1aa0a
+8. main @ 0x0000000007656578
+9. ? @ 0x00007f0758fc1083
+10. _start @ 0x0000000005de262e
+ (version 24.3.18.7 (official build))
+2025.09.30 15:26:08.492487 [ 59 ] {} <Warning> Context: Linux transparent hugepages are set to "always". Check /sys/kernel/mm/transparent_hugepage/enabled
+2025.09.30 15:26:08.493055 [ 59 ] {} <Warning> Context: Delay accounting is not enabled, OSIOWaitMicroseconds will not be gathered. You can enable it using `echo 1 > /proc/sys/kernel/task_delayacct` or by using sysctl.
+2025.09.30 15:26:08.631091 [ 59 ] {} <Warning> Access(local_directory): File /var/lib/clickhouse/access/users.list doesn't exist
+2025.09.30 15:26:08.631411 [ 59 ] {} <Warning> Access(local_directory): Recovering lists in directory /var/lib/clickhouse/access/
+2025.09.30 15:26:10.967017 [ 1 ] {} <Warning> Context: Linux transparent hugepages are set to "always". Check /sys/kernel/mm/transparent_hugepage/enabled
+2025.09.30 15:26:10.968193 [ 1 ] {} <Warning> Context: Delay accounting is not enabled, OSIOWaitMicroseconds will not be gathered. You can enable it using `echo 1 > /proc/sys/kernel/task_delayacct` or by using sysctl.
+2025.09.30 15:27:53.464992 [ 275 ] {} <Error> Access(user directories): from: 172.18.0.1, user: admin: Authentication failed: Code: 193. DB::Exception: Invalid credentials. (WRONG_PASSWORD), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<>(int, FormatStringHelperImpl<>) @ 0x00000000076664e3
+2. DB::IAccessStorage::throwInvalidCredentials() @ 0x000000000f889258
+3. DB::IAccessStorage::authenticateImpl(DB::Credentials const&, Poco::Net::IPAddress const&, DB::ExternalAuthenticators const&, bool, bool, bool) const @ 0x000000000f888e61
+4. DB::MultipleAccessStorage::authenticateImpl(DB::Credentials const&, Poco::Net::IPAddress const&, DB::ExternalAuthenticators const&, bool, bool, bool) const @ 0x000000000f8c003a
+5. DB::AccessControl::authenticate(DB::Credentials const&, Poco::Net::IPAddress const&, String const&) const @ 0x000000000f7fb8a5
+6. DB::Session::authenticate(DB::Credentials const&, Poco::Net::SocketAddress const&) @ 0x0000000010cd3223
+7. DB::HTTPHandler::authenticateUser(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&) @ 0x0000000011fda064
+8. DB::HTTPHandler::processQuery(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&, DB::HTTPHandler::Output&, std::optional<DB::CurrentThread::QueryScope>&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fdb87e
+9. DB::HTTPHandler::handleRequest(DB::HTTPServerRequest&, DB::HTTPServerResponse&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fe3e34
+10. DB::HTTPServerConnection::run() @ 0x00000000120634da
+11. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+12. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+13. Poco::PooledThread::run() @ 0x0000000014a8bf81
+14. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+15. ? @ 0x00007f5f0887e609
+16. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:27:53.465611 [ 275 ] {} <Error> DynamicQueryHandler: Code: 516. DB::Exception: admin: Authentication failed: password is incorrect, or there is no user with such name. (AUTHENTICATION_FAILED), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception(PreformattedMessage&&, int) @ 0x000000000774a4cc
+2. DB::AccessControl::authenticate(DB::Credentials const&, Poco::Net::IPAddress const&, String const&) const @ 0x000000000f7fbd6b
+3. DB::Session::authenticate(DB::Credentials const&, Poco::Net::SocketAddress const&) @ 0x0000000010cd3223
+4. DB::HTTPHandler::authenticateUser(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&) @ 0x0000000011fda064
+5. DB::HTTPHandler::processQuery(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&, DB::HTTPHandler::Output&, std::optional<DB::CurrentThread::QueryScope>&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fdb87e
+6. DB::HTTPHandler::handleRequest(DB::HTTPServerRequest&, DB::HTTPServerResponse&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fe3e34
+7. DB::HTTPServerConnection::run() @ 0x00000000120634da
+8. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+9. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+10. Poco::PooledThread::run() @ 0x0000000014a8bf81
+11. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+12. ? @ 0x00007f5f0887e609
+13. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:27:53.492684 [ 275 ] {} <Error> Access(user directories): from: 172.18.0.1, user: admin: Authentication failed: Code: 193. DB::Exception: Invalid credentials. (WRONG_PASSWORD), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<>(int, FormatStringHelperImpl<>) @ 0x00000000076664e3
+2. DB::IAccessStorage::throwInvalidCredentials() @ 0x000000000f889258
+3. DB::IAccessStorage::authenticateImpl(DB::Credentials const&, Poco::Net::IPAddress const&, DB::ExternalAuthenticators const&, bool, bool, bool) const @ 0x000000000f888e61
+4. DB::MultipleAccessStorage::authenticateImpl(DB::Credentials const&, Poco::Net::IPAddress const&, DB::ExternalAuthenticators const&, bool, bool, bool) const @ 0x000000000f8c003a
+5. DB::AccessControl::authenticate(DB::Credentials const&, Poco::Net::IPAddress const&, String const&) const @ 0x000000000f7fb8a5
+6. DB::Session::authenticate(DB::Credentials const&, Poco::Net::SocketAddress const&) @ 0x0000000010cd3223
+7. DB::HTTPHandler::authenticateUser(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&) @ 0x0000000011fda064
+8. DB::HTTPHandler::processQuery(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&, DB::HTTPHandler::Output&, std::optional<DB::CurrentThread::QueryScope>&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fdb87e
+9. DB::HTTPHandler::handleRequest(DB::HTTPServerRequest&, DB::HTTPServerResponse&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fe3e34
+10. DB::HTTPServerConnection::run() @ 0x00000000120634da
+11. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+12. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+13. Poco::PooledThread::run() @ 0x0000000014a8bf81
+14. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+15. ? @ 0x00007f5f0887e609
+16. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:27:53.493851 [ 275 ] {} <Error> DynamicQueryHandler: Code: 516. DB::Exception: admin: Authentication failed: password is incorrect, or there is no user with such name. (AUTHENTICATION_FAILED), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception(PreformattedMessage&&, int) @ 0x000000000774a4cc
+2. DB::AccessControl::authenticate(DB::Credentials const&, Poco::Net::IPAddress const&, String const&) const @ 0x000000000f7fbd6b
+3. DB::Session::authenticate(DB::Credentials const&, Poco::Net::SocketAddress const&) @ 0x0000000010cd3223
+4. DB::HTTPHandler::authenticateUser(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&) @ 0x0000000011fda064
+5. DB::HTTPHandler::processQuery(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&, DB::HTTPHandler::Output&, std::optional<DB::CurrentThread::QueryScope>&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fdb87e
+6. DB::HTTPHandler::handleRequest(DB::HTTPServerRequest&, DB::HTTPServerResponse&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fe3e34
+7. DB::HTTPServerConnection::run() @ 0x00000000120634da
+8. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+9. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+10. Poco::PooledThread::run() @ 0x0000000014a8bf81
+11. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+12. ? @ 0x00007f5f0887e609
+13. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:38:31.213763 [ 275 ] {33cf92db-33c1-42d6-8758-e1853c42ee18} <Error> executeQuery: Code: 497. DB::Exception: etl: Not enough privileges. To execute this query, it's necessary to have the grant SHOW USERS ON *.*. (ACCESS_DENIED) (version 24.3.18.7 (official build)) (from 172.18.0.10:35372) (in query: show grants for analytics), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String, String>(int, FormatStringHelperImpl<std::type_identity<String>::type, std::type_identity<String>::type>, String&&, String&&) @ 0x000000000765b01d
+2. bool DB::ContextAccess::checkAccessImplHelper<true, false>(DB::AccessFlags) const @ 0x000000000f83b02e
+3. bool DB::ContextAccess::checkAccessImplHelper<true, false>(DB::AccessRightsElement const&) const @ 0x000000000f846753
+4. DB::CachedAccessChecking::checkAccess(bool) @ 0x000000001107530a
+5. DB::InterpreterShowGrantsQuery::execute() @ 0x0000000011070fa6
+6. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+7. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+8. DB::HTTPHandler::processQuery(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&, DB::HTTPHandler::Output&, std::optional<DB::CurrentThread::QueryScope>&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fdf375
+9. DB::HTTPHandler::handleRequest(DB::HTTPServerRequest&, DB::HTTPServerResponse&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fe3e34
+10. DB::HTTPServerConnection::run() @ 0x00000000120634da
+11. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+12. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+13. Poco::PooledThread::run() @ 0x0000000014a8bf81
+14. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+15. ? @ 0x00007f5f0887e609
+16. ? @ 0x00007f5f087a3353
+
+2025.09.30 15:38:31.214624 [ 275 ] {33cf92db-33c1-42d6-8758-e1853c42ee18} <Error> DynamicQueryHandler: Code: 497. DB::Exception: etl: Not enough privileges. To execute this query, it's necessary to have the grant SHOW USERS ON *.*. (ACCESS_DENIED), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String, String>(int, FormatStringHelperImpl<std::type_identity<String>::type, std::type_identity<String>::type>, String&&, String&&) @ 0x000000000765b01d
+2. bool DB::ContextAccess::checkAccessImplHelper<true, false>(DB::AccessFlags) const @ 0x000000000f83b02e
+3. bool DB::ContextAccess::checkAccessImplHelper<true, false>(DB::AccessRightsElement const&) const @ 0x000000000f846753
+4. DB::CachedAccessChecking::checkAccess(bool) @ 0x000000001107530a
+5. DB::InterpreterShowGrantsQuery::execute() @ 0x0000000011070fa6
+6. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+7. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+8. DB::HTTPHandler::processQuery(DB::HTTPServerRequest&, DB::HTMLForm&, DB::HTTPServerResponse&, DB::HTTPHandler::Output&, std::optional<DB::CurrentThread::QueryScope>&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fdf375
+9. DB::HTTPHandler::handleRequest(DB::HTTPServerRequest&, DB::HTTPServerResponse&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000011fe3e34
+10. DB::HTTPServerConnection::run() @ 0x00000000120634da
+11. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+12. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+13. Poco::PooledThread::run() @ 0x0000000014a8bf81
+14. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+15. ? @ 0x00007f5f0887e609
+16. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:51:28.389391 [ 473 ] {5b65de58-0774-4664-87ea-7db719c6568d} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000004 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'c2739568-f5b8-4a99-9e48-50da2b4c9793' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007f5f0887e609
+18. ? @ 0x00007f5f087a3353
+
+2025.09.30 15:51:28.390076 [ 473 ] {5b65de58-0774-4664-87ea-7db719c6568d} <Error> DDLWorker: Query /* ddl_entry=query-0000000004 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'c2739568-f5b8-4a99-9e48-50da2b4c9793' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007f5f0887e609
+18. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:51:36.844606 [ 473 ] {0057989e-bc8f-4d25-bd43-f5c0b2a4e48e} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000005 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'ad8669ff-1a15-4308-bb35-eabc637a86cc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007f5f0887e609
+18. ? @ 0x00007f5f087a3353
+
+2025.09.30 15:51:36.844974 [ 473 ] {0057989e-bc8f-4d25-bd43-f5c0b2a4e48e} <Error> DDLWorker: Query /* ddl_entry=query-0000000005 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'ad8669ff-1a15-4308-bb35-eabc637a86cc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007f5f0887e609
+18. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:52:07.572615 [ 473 ] {569b29d1-38ac-490d-b085-918996555466} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000006 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID '74784f13-4549-491c-83d9-5a40788c91dc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime64(3), `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007f5f0887e609
+18. ? @ 0x00007f5f087a3353
+
+2025.09.30 15:52:07.573114 [ 473 ] {569b29d1-38ac-490d-b085-918996555466} <Error> DDLWorker: Query /* ddl_entry=query-0000000006 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID '74784f13-4549-491c-83d9-5a40788c91dc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime64(3), `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007f5f0887e609
+18. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:53:18.582539 [ 323 ] {} <Warning> reports.monthly_business_metrics (b3f1459f-871d-4922-be9d-193684354eae): Log pointer of source replica replica_03 changed while we loading queue nodes. Will retry.
+2025.09.30 16:10:59.003531 [ 275 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007f5f0887e609
+14. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:18:45.620164 [ 3117 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007f5f0887e609
+14. ? @ 0x00007f5f087a3353
+ (version 24.3.18.7 (official build))

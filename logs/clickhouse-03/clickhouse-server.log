@@ -1,0 +1,406 @@
+2025.09.30 15:16:58.791917 [ 59 ] {} <Information> SentryWriter: Sending crash reports is disabled
+2025.09.30 15:16:58.826128 [ 59 ] {} <Information> Application: Starting ClickHouse 24.3.18.7 (revision: 54496, git hash: 807f69cd6a86b00b05d369a9cd49c4c4e7a87788, build id: 01E72825FF490B6562012A8D711A33F324F30420), PID 59
+2025.09.30 15:16:58.826482 [ 59 ] {} <Information> Application: starting up
+2025.09.30 15:16:58.826636 [ 59 ] {} <Information> Application: OS name: Linux, version: 5.15.167.4-microsoft-standard-WSL2, architecture: x86_64
+2025.09.30 15:16:58.829753 [ 59 ] {} <Information> Application: Available RAM: 15.47 GiB; logical cores: 20; used cores: 20.
+2025.09.30 15:16:58.830093 [ 59 ] {} <Information> Application: Available CPU instruction sets: SSE, SSE2, SSE3, SSSE3, SSE41, SSE42, F16C, POPCNT, BMI1, BMI2, PCLMUL, AES, AVX, FMA, AVX2, SHA, ADX, RDRAND, RDSEED, RDTSCP, CLFLUSHOPT, CLWB, XSAVE, OSXSAVE
+2025.09.30 15:16:58.830838 [ 59 ] {} <Information> Application: Shutting down storages.
+2025.09.30 15:16:58.831008 [ 59 ] {} <Information> Application: Waiting for background threads
+2025.09.30 15:16:58.831113 [ 59 ] {} <Information> Application: Background threads finished in 0 ms
+2025.09.30 15:16:58.832684 [ 59 ] {} <Error> Application: Code: 137. DB::Exception: A setting 'max_threads' appeared at top level in config /etc/clickhouse-server/config.xml. But it is user-level setting that should be located in users.xml inside <profiles> section for specific profile. You can add it to <profiles><default> if you want to change default value of this setting. You can also disable the check - specify <skip_check_for_incorrect_settings>1</skip_check_for_incorrect_settings> in the main configuration file. (UNKNOWN_ELEMENT_IN_CONFIG), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String const&, String const&>(int, FormatStringHelperImpl<std::type_identity<String const&>::type, std::type_identity<String const&>::type>, String const&, String const&) @ 0x000000000766121d
+2. DB::Settings::checkNoSettingNamesAtTopLevel(Poco::Util::AbstractConfiguration const&, String const&) @ 0x000000000fb420a2
+3. DB::Server::main(std::vector<String, std::allocator<String>> const&) @ 0x000000000ca22f2a
+4. Poco::Util::Application::run() @ 0x000000001499f706
+5. DB::Server::run() @ 0x000000000ca1ec11
+6. Poco::Util::ServerApplication::run(int, char**) @ 0x00000000149a85b9
+7. mainEntryClickHouseServer(int, char**) @ 0x000000000ca1aa0a
+8. main @ 0x0000000007656578
+9. ? @ 0x00007f72d26c2083
+10. _start @ 0x0000000005de262e
+ (version 24.3.18.7 (official build))
+2025.09.30 15:16:58.833008 [ 59 ] {} <Information> Application: shutting down
+2025.09.30 15:16:58.833468 [ 62 ] {} <Information> BaseDaemon: Stop SignalListener thread
+2025.09.30 15:26:08.346020 [ 59 ] {} <Information> SentryWriter: Sending crash reports is disabled
+2025.09.30 15:26:08.379326 [ 59 ] {} <Information> Application: Starting ClickHouse 24.3.18.7 (revision: 54496, git hash: 807f69cd6a86b00b05d369a9cd49c4c4e7a87788, build id: 01E72825FF490B6562012A8D711A33F324F30420), PID 59
+2025.09.30 15:26:08.379602 [ 59 ] {} <Information> Application: starting up
+2025.09.30 15:26:08.379755 [ 59 ] {} <Information> Application: OS name: Linux, version: 5.15.167.4-microsoft-standard-WSL2, architecture: x86_64
+2025.09.30 15:26:08.383282 [ 59 ] {} <Information> Application: Available RAM: 15.47 GiB; logical cores: 20; used cores: 20.
+2025.09.30 15:26:08.383450 [ 59 ] {} <Information> Application: Available CPU instruction sets: SSE, SSE2, SSE3, SSSE3, SSE41, SSE42, F16C, POPCNT, BMI1, BMI2, PCLMUL, AES, AVX, FMA, AVX2, SHA, ADX, RDRAND, RDSEED, RDTSCP, CLFLUSHOPT, CLWB, XSAVE, OSXSAVE
+2025.09.30 15:26:08.387225 [ 59 ] {} <Warning> Context: Linux transparent hugepages are set to "always". Check /sys/kernel/mm/transparent_hugepage/enabled
+2025.09.30 15:26:08.387792 [ 59 ] {} <Warning> Context: Delay accounting is not enabled, OSIOWaitMicroseconds will not be gathered. You can enable it using `echo 1 > /proc/sys/kernel/task_delayacct` or by using sysctl.
+2025.09.30 15:26:08.509122 [ 59 ] {} <Information> Application: Integrity check of the executable successfully passed (checksum: 320B53F8BF4FE8E8384861CB571F5F2D)
+2025.09.30 15:26:08.509401 [ 59 ] {} <Information> Application: It looks like the process has no CAP_IPC_LOCK capability, binary mlock will be disabled. It could happen due to incorrect ClickHouse package installation. You could resolve the problem manually with 'sudo setcap cap_ipc_lock=+ep /usr/bin/clickhouse'. Note that it will not work on 'nosuid' mounted filesystems.
+2025.09.30 15:26:08.571254 [ 59 ] {} <Information> Application: Lowered uncompressed cache size to 7.74 GiB because the system has limited RAM
+2025.09.30 15:26:08.571462 [ 59 ] {} <Information> Application: Lowered mark cache size to 7.74 GiB because the system has limited RAM
+2025.09.30 15:26:08.571724 [ 59 ] {} <Information> CgroupsMemoryUsageObserver: Will read the current memory usage from '/sys/fs/cgroup/memory' (cgroups version: v1), wait time is 15 sec
+2025.09.30 15:26:08.581893 [ 59 ] {} <Information> Application: Setting max_server_memory_usage was set to 13.15 GiB (15.47 GiB available * 0.85 max_server_memory_usage_to_ram_ratio)
+2025.09.30 15:26:08.582076 [ 59 ] {} <Information> CgroupsMemoryUsageObserver: Set new limits, soft limit: 11.84 GiB, hard limit: 12.50 GiB
+2025.09.30 15:26:08.582189 [ 59 ] {} <Information> Application: Setting merges_mutations_memory_usage_soft_limit was set to 7.74 GiB (15.47 GiB available * 0.50 merges_mutations_memory_usage_to_ram_ratio)
+2025.09.30 15:26:08.582307 [ 59 ] {} <Information> Application: Merges and mutations memory limit is set to 7.74 GiB
+2025.09.30 15:26:08.583165 [ 59 ] {} <Information> BackgroundSchedulePool/BgBufSchPool: Create BackgroundSchedulePool with 16 threads
+2025.09.30 15:26:08.585122 [ 59 ] {} <Information> BackgroundSchedulePool/BgSchPool: Create BackgroundSchedulePool with 64 threads
+2025.09.30 15:26:08.604087 [ 59 ] {} <Information> BackgroundSchedulePool/BgMBSchPool: Create BackgroundSchedulePool with 8 threads
+2025.09.30 15:26:08.609311 [ 59 ] {} <Information> BackgroundSchedulePool/BgDistSchPool: Create BackgroundSchedulePool with 16 threads
+2025.09.30 15:26:08.612451 [ 59 ] {} <Information> CertificateReloader: One of paths is empty. Cannot apply new configuration for certificates. Fill all paths and try again.
+2025.09.30 15:26:08.613227 [ 59 ] {} <Information> Application: Listening for replica communication (interserver): http://127.0.0.1:9009
+2025.09.30 15:26:08.618864 [ 59 ] {} <Warning> Access(local_directory): File /var/lib/clickhouse/access/users.list doesn't exist
+2025.09.30 15:26:08.619191 [ 59 ] {} <Warning> Access(local_directory): Recovering lists in directory /var/lib/clickhouse/access/
+2025.09.30 15:26:08.619621 [ 59 ] {} <Information> CgroupsMemoryUsageObserver: Started cgroup current memory usage observer thread
+2025.09.30 15:26:08.619759 [ 175 ] {} <Information> CgroupsMemoryUsageObserver: Memory amount initially available to the process is 15.47 GiB
+2025.09.30 15:26:08.621645 [ 59 ] {} <Information> Context: Initialized background executor for merges and mutations with num_threads=16, num_tasks=32, scheduling_policy=round_robin
+2025.09.30 15:26:08.622568 [ 59 ] {} <Information> Context: Initialized background executor for move operations with num_threads=8, num_tasks=8
+2025.09.30 15:26:08.624024 [ 59 ] {} <Information> Context: Initialized background executor for fetches with num_threads=16, num_tasks=16
+2025.09.30 15:26:08.625277 [ 59 ] {} <Information> Context: Initialized background executor for common operations (e.g. clearing old parts) with num_threads=8, num_tasks=8
+2025.09.30 15:26:08.627238 [ 59 ] {} <Information> DNSCacheUpdater: Update period 15 seconds
+2025.09.30 15:26:08.627418 [ 59 ] {} <Information> Application: Loading metadata from /var/lib/clickhouse/
+2025.09.30 15:26:08.636251 [ 59 ] {} <Information> DatabaseAtomic (system): Metadata processed, database system has 0 tables and 0 dictionaries in total.
+2025.09.30 15:26:08.636472 [ 59 ] {} <Information> TablesLoader: Parsed metadata of 0 tables in 1 databases in 0.000340043 sec
+2025.09.30 15:26:08.651491 [ 59 ] {} <Information> DatabaseCatalog: Found 0 partially dropped tables. Will load them and retry removal.
+2025.09.30 15:26:08.655238 [ 59 ] {} <Information> DatabaseAtomic (default): Metadata processed, database default has 0 tables and 0 dictionaries in total.
+2025.09.30 15:26:08.655406 [ 59 ] {} <Information> TablesLoader: Parsed metadata of 0 tables in 1 databases in 0.000212317 sec
+2025.09.30 15:26:08.655625 [ 59 ] {} <Information> loadMetadata: Start synchronous loading of databases
+2025.09.30 15:26:08.655792 [ 59 ] {} <Information> loadMetadata: Start synchronous startup of databases
+2025.09.30 15:26:08.656508 [ 59 ] {} <Information> UserDefinedSQLObjectsLoaderFromDisk: Loading user defined objects from /var/lib/clickhouse/user_defined/
+2025.09.30 15:26:08.656694 [ 59 ] {} <Information> Application: Tasks stats provider: procfs
+2025.09.30 15:26:08.656793 [ 59 ] {} <Information> Application: It looks like the process has no CAP_SYS_NICE capability, the setting 'os_thread_priority' will have no effect. It could happen due to incorrect ClickHouse package installation. You could resolve the problem manually with 'sudo setcap cap_sys_nice=+ep /usr/bin/clickhouse'. Note that it will not work on 'nosuid' mounted filesystems.
+2025.09.30 15:26:08.705943 [ 59 ] {} <Information> CertificateReloader: One of paths is empty. Cannot apply new configuration for certificates. Fill all paths and try again.
+2025.09.30 15:26:08.708528 [ 59 ] {} <Information> Application: Listening for http://127.0.0.1:8123
+2025.09.30 15:26:08.708773 [ 59 ] {} <Information> Application: Listening for native protocol (tcp): 127.0.0.1:9000
+2025.09.30 15:26:08.709139 [ 59 ] {} <Information> Application: Listening for MySQL compatibility protocol: 127.0.0.1:9004
+2025.09.30 15:26:08.709300 [ 59 ] {} <Information> Application: Listening for PostgreSQL compatibility protocol: 127.0.0.1:9005
+2025.09.30 15:26:08.709459 [ 59 ] {} <Information> Application: Listening for Prometheus: http://127.0.0.1:9363
+2025.09.30 15:26:08.721849 [ 264 ] {} <Information> ZooKeeperClient: Connected to ZooKeeper at 172.18.0.4:2181 with session_id 216172926961451008
+2025.09.30 15:26:08.726494 [ 264 ] {} <Information> ZooKeeperClient: Keeper feature flag FILTERED_LIST: disabled
+2025.09.30 15:26:08.726626 [ 264 ] {} <Information> ZooKeeperClient: Keeper feature flag MULTI_READ: disabled
+2025.09.30 15:26:08.726756 [ 264 ] {} <Information> ZooKeeperClient: Keeper feature flag CHECK_NOT_EXISTS: disabled
+2025.09.30 15:26:08.726854 [ 264 ] {} <Information> ZooKeeperClient: Keeper feature flag CREATE_IF_NOT_EXISTS: disabled
+2025.09.30 15:26:08.760307 [ 59 ] {} <Information> Application: Ready for connections.
+2025.09.30 15:26:09.342557 [ 62 ] {} <Information> Application: Received termination signal (Terminated)
+2025.09.30 15:26:10.211401 [ 59 ] {} <Information> Application: Closed all listening sockets.
+2025.09.30 15:26:10.212099 [ 59 ] {} <Information> Application: Closed connections.
+2025.09.30 15:26:10.212627 [ 59 ] {} <Information> Application: Stopping AsyncLoader.
+2025.09.30 15:26:10.212853 [ 59 ] {} <Information> CgroupsMemoryUsageObserver: Stopped cgroup current memory usage observer thread
+2025.09.30 15:26:10.213996 [ 59 ] {} <Information> Application: Shutting down storages.
+2025.09.30 15:26:10.699593 [ 59 ] {} <Information> Context: Shutdown disk default
+2025.09.30 15:26:10.699916 [ 59 ] {} <Information> ZooKeeperClient: Finalizing session 216172926961451008. finalization_started: false, queue_finished: false, reason: 'Destructor called'
+2025.09.30 15:26:10.866031 [ 59 ] {} <Information> Application: Closed all listening sockets.
+2025.09.30 15:26:10.866553 [ 59 ] {} <Information> Application: Closed connections to servers for tables.
+2025.09.30 15:26:10.869437 [ 59 ] {} <Information> Application: Waiting for background threads
+2025.09.30 15:26:10.878782 [ 59 ] {} <Information> Application: Background threads finished in 9 ms
+2025.09.30 15:26:10.879784 [ 59 ] {} <Information> Application: shutting down
+2025.09.30 15:26:10.880376 [ 62 ] {} <Information> BaseDaemon: Stop SignalListener thread
+2025.09.30 15:26:10.915915 [ 1 ] {} <Information> SentryWriter: Sending crash reports is disabled
+2025.09.30 15:26:10.945865 [ 1 ] {} <Information> Application: Starting ClickHouse 24.3.18.7 (revision: 54496, git hash: 807f69cd6a86b00b05d369a9cd49c4c4e7a87788, build id: 01E72825FF490B6562012A8D711A33F324F30420), PID 1
+2025.09.30 15:26:10.946669 [ 1 ] {} <Information> Application: starting up
+2025.09.30 15:26:10.947115 [ 1 ] {} <Information> Application: OS name: Linux, version: 5.15.167.4-microsoft-standard-WSL2, architecture: x86_64
+2025.09.30 15:26:10.950276 [ 1 ] {} <Information> Application: Available RAM: 15.47 GiB; logical cores: 20; used cores: 20.
+2025.09.30 15:26:10.950699 [ 1 ] {} <Information> Application: Available CPU instruction sets: SSE, SSE2, SSE3, SSSE3, SSE41, SSE42, F16C, POPCNT, BMI1, BMI2, PCLMUL, AES, AVX, FMA, AVX2, SHA, ADX, RDRAND, RDSEED, RDTSCP, CLFLUSHOPT, CLWB, XSAVE, OSXSAVE
+2025.09.30 15:26:10.953420 [ 1 ] {} <Warning> Context: Linux transparent hugepages are set to "always". Check /sys/kernel/mm/transparent_hugepage/enabled
+2025.09.30 15:26:10.954580 [ 1 ] {} <Warning> Context: Delay accounting is not enabled, OSIOWaitMicroseconds will not be gathered. You can enable it using `echo 1 > /proc/sys/kernel/task_delayacct` or by using sysctl.
+2025.09.30 15:26:11.044253 [ 1 ] {} <Information> Application: Integrity check of the executable successfully passed (checksum: 320B53F8BF4FE8E8384861CB571F5F2D)
+2025.09.30 15:26:11.044552 [ 1 ] {} <Information> Application: It looks like the process has no CAP_IPC_LOCK capability, binary mlock will be disabled. It could happen due to incorrect ClickHouse package installation. You could resolve the problem manually with 'sudo setcap cap_ipc_lock=+ep /usr/bin/clickhouse'. Note that it will not work on 'nosuid' mounted filesystems.
+2025.09.30 15:26:11.044975 [ 1 ] {} <Information> Application: Lowered uncompressed cache size to 7.74 GiB because the system has limited RAM
+2025.09.30 15:26:11.045106 [ 1 ] {} <Information> Application: Lowered mark cache size to 7.74 GiB because the system has limited RAM
+2025.09.30 15:26:11.045313 [ 1 ] {} <Information> CgroupsMemoryUsageObserver: Will read the current memory usage from '/sys/fs/cgroup/memory' (cgroups version: v1), wait time is 15 sec
+2025.09.30 15:26:11.055202 [ 1 ] {} <Information> Application: Setting max_server_memory_usage was set to 13.15 GiB (15.47 GiB available * 0.85 max_server_memory_usage_to_ram_ratio)
+2025.09.30 15:26:11.055359 [ 1 ] {} <Information> CgroupsMemoryUsageObserver: Set new limits, soft limit: 11.84 GiB, hard limit: 12.50 GiB
+2025.09.30 15:26:11.055502 [ 1 ] {} <Information> Application: Setting merges_mutations_memory_usage_soft_limit was set to 7.74 GiB (15.47 GiB available * 0.50 merges_mutations_memory_usage_to_ram_ratio)
+2025.09.30 15:26:11.055620 [ 1 ] {} <Information> Application: Merges and mutations memory limit is set to 7.74 GiB
+2025.09.30 15:26:11.056640 [ 1 ] {} <Information> BackgroundSchedulePool/BgBufSchPool: Create BackgroundSchedulePool with 16 threads
+2025.09.30 15:26:11.058077 [ 1 ] {} <Information> BackgroundSchedulePool/BgSchPool: Create BackgroundSchedulePool with 64 threads
+2025.09.30 15:26:11.068618 [ 1 ] {} <Information> BackgroundSchedulePool/BgMBSchPool: Create BackgroundSchedulePool with 8 threads
+2025.09.30 15:26:11.081081 [ 1 ] {} <Information> BackgroundSchedulePool/BgDistSchPool: Create BackgroundSchedulePool with 16 threads
+2025.09.30 15:26:11.085870 [ 1 ] {} <Information> CertificateReloader: One of paths is empty. Cannot apply new configuration for certificates. Fill all paths and try again.
+2025.09.30 15:26:11.086362 [ 1 ] {} <Information> Application: Listening for replica communication (interserver): http://0.0.0.0:9009
+2025.09.30 15:26:11.091496 [ 1 ] {} <Information> CgroupsMemoryUsageObserver: Started cgroup current memory usage observer thread
+2025.09.30 15:26:11.091593 [ 385 ] {} <Information> CgroupsMemoryUsageObserver: Memory amount initially available to the process is 15.47 GiB
+2025.09.30 15:26:11.092873 [ 1 ] {} <Information> Context: Initialized background executor for merges and mutations with num_threads=16, num_tasks=32, scheduling_policy=round_robin
+2025.09.30 15:26:11.093603 [ 1 ] {} <Information> Context: Initialized background executor for move operations with num_threads=8, num_tasks=8
+2025.09.30 15:26:11.095175 [ 1 ] {} <Information> Context: Initialized background executor for fetches with num_threads=16, num_tasks=16
+2025.09.30 15:26:11.095859 [ 1 ] {} <Information> Context: Initialized background executor for common operations (e.g. clearing old parts) with num_threads=8, num_tasks=8
+2025.09.30 15:26:11.097866 [ 1 ] {} <Information> DNSCacheUpdater: Update period 15 seconds
+2025.09.30 15:26:11.097968 [ 1 ] {} <Information> Application: Loading metadata from /var/lib/clickhouse/
+2025.09.30 15:26:11.103938 [ 1 ] {} <Information> DatabaseAtomic (system): Metadata processed, database system has 4 tables and 0 dictionaries in total.
+2025.09.30 15:26:11.104073 [ 1 ] {} <Information> TablesLoader: Parsed metadata of 4 tables in 1 databases in 0.005809316 sec
+2025.09.30 15:26:11.131802 [ 1 ] {} <Information> DatabaseCatalog: Found 0 partially dropped tables. Will load them and retry removal.
+2025.09.30 15:26:11.132109 [ 1 ] {} <Information> DatabaseAtomic (default): Metadata processed, database default has 0 tables and 0 dictionaries in total.
+2025.09.30 15:26:11.132240 [ 1 ] {} <Information> TablesLoader: Parsed metadata of 0 tables in 1 databases in 0.000146699 sec
+2025.09.30 15:26:11.132380 [ 1 ] {} <Information> loadMetadata: Start synchronous loading of databases
+2025.09.30 15:26:11.132505 [ 1 ] {} <Information> loadMetadata: Start synchronous startup of databases
+2025.09.30 15:26:11.132914 [ 1 ] {} <Information> UserDefinedSQLObjectsLoaderFromDisk: Loading user defined objects from /var/lib/clickhouse/user_defined/
+2025.09.30 15:26:11.133132 [ 1 ] {} <Information> Application: Tasks stats provider: procfs
+2025.09.30 15:26:11.133244 [ 1 ] {} <Information> Application: It looks like the process has no CAP_SYS_NICE capability, the setting 'os_thread_priority' will have no effect. It could happen due to incorrect ClickHouse package installation. You could resolve the problem manually with 'sudo setcap cap_sys_nice=+ep /usr/bin/clickhouse'. Note that it will not work on 'nosuid' mounted filesystems.
+2025.09.30 15:26:11.217117 [ 1 ] {} <Information> CertificateReloader: One of paths is empty. Cannot apply new configuration for certificates. Fill all paths and try again.
+2025.09.30 15:26:11.219050 [ 1 ] {} <Information> Application: Listening for http://0.0.0.0:8123
+2025.09.30 15:26:11.219270 [ 1 ] {} <Information> Application: Listening for native protocol (tcp): 0.0.0.0:9000
+2025.09.30 15:26:11.219462 [ 1 ] {} <Information> Application: Listening for MySQL compatibility protocol: 0.0.0.0:9004
+2025.09.30 15:26:11.219700 [ 1 ] {} <Information> Application: Listening for PostgreSQL compatibility protocol: 0.0.0.0:9005
+2025.09.30 15:26:11.219867 [ 1 ] {} <Information> Application: Listening for Prometheus: http://0.0.0.0:9363
+2025.09.30 15:26:11.224516 [ 473 ] {} <Information> ZooKeeperClient: Connected to ZooKeeper at 172.18.0.4:2181 with session_id 216172926961451009
+2025.09.30 15:26:11.226843 [ 473 ] {} <Information> ZooKeeperClient: Keeper feature flag FILTERED_LIST: disabled
+2025.09.30 15:26:11.227014 [ 473 ] {} <Information> ZooKeeperClient: Keeper feature flag MULTI_READ: disabled
+2025.09.30 15:26:11.227141 [ 473 ] {} <Information> ZooKeeperClient: Keeper feature flag CHECK_NOT_EXISTS: disabled
+2025.09.30 15:26:11.227242 [ 473 ] {} <Information> ZooKeeperClient: Keeper feature flag CREATE_IF_NOT_EXISTS: disabled
+2025.09.30 15:26:11.240862 [ 1 ] {} <Information> Application: Ready for connections.
+2025.09.30 15:50:26.294662 [ 473 ] {388f3086-2307-4a23-bd89-aebce0f0f546} <Information> DatabaseAtomic (stage0): Metadata processed, database stage0 has 0 tables and 0 dictionaries in total.
+2025.09.30 15:50:26.295137 [ 473 ] {388f3086-2307-4a23-bd89-aebce0f0f546} <Information> TablesLoader: Parsed metadata of 0 tables in 1 databases in 0.000521148 sec
+2025.09.30 15:50:28.679473 [ 473 ] {5ab24af8-637b-4dd5-81d6-30a68671c318} <Information> DatabaseAtomic (stage1): Metadata processed, database stage1 has 0 tables and 0 dictionaries in total.
+2025.09.30 15:50:28.679898 [ 473 ] {5ab24af8-637b-4dd5-81d6-30a68671c318} <Information> TablesLoader: Parsed metadata of 0 tables in 1 databases in 0.000486035 sec
+2025.09.30 15:50:32.038200 [ 473 ] {e67da298-e012-4fcd-ba48-9c348ded0bb9} <Information> DatabaseAtomic (stage2): Metadata processed, database stage2 has 0 tables and 0 dictionaries in total.
+2025.09.30 15:50:32.038548 [ 473 ] {e67da298-e012-4fcd-ba48-9c348ded0bb9} <Information> TablesLoader: Parsed metadata of 0 tables in 1 databases in 0.000399902 sec
+2025.09.30 15:50:33.605194 [ 473 ] {4a05777c-ac76-458a-811f-e69e3f6fff42} <Information> DatabaseAtomic (reports): Metadata processed, database reports has 0 tables and 0 dictionaries in total.
+2025.09.30 15:50:33.605534 [ 473 ] {4a05777c-ac76-458a-811f-e69e3f6fff42} <Information> TablesLoader: Parsed metadata of 0 tables in 1 databases in 0.000401249 sec
+2025.09.30 15:51:28.389391 [ 473 ] {815611ce-ffaa-46a7-870e-a2faa1c7f0fb} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000004 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'c2739568-f5b8-4a99-9e48-50da2b4c9793' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+
+2025.09.30 15:51:28.390075 [ 473 ] {815611ce-ffaa-46a7-870e-a2faa1c7f0fb} <Error> DDLWorker: Query /* ddl_entry=query-0000000004 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'c2739568-f5b8-4a99-9e48-50da2b4c9793' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:51:36.844691 [ 473 ] {bc8d377e-47f8-4b8c-b498-0588c0baa1d7} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000005 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'ad8669ff-1a15-4308-bb35-eabc637a86cc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+
+2025.09.30 15:51:36.845168 [ 473 ] {bc8d377e-47f8-4b8c-b498-0588c0baa1d7} <Error> DDLWorker: Query /* ddl_entry=query-0000000005 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID 'ad8669ff-1a15-4308-bb35-eabc637a86cc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime, `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:52:07.572659 [ 473 ] {bd78f20b-09e2-4b85-8a03-4e3b2315bac9} <Error> executeQuery: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION) (version 24.3.18.7 (official build)) (from 0.0.0.0:0) (in query: /* ddl_entry=query-0000000006 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID '74784f13-4549-491c-83d9-5a40788c91dc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime64(3), `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+
+2025.09.30 15:52:07.573362 [ 473 ] {bd78f20b-09e2-4b85-8a03-4e3b2315bac9} <Error> DDLWorker: Query /* ddl_entry=query-0000000006 */ CREATE TABLE IF NOT EXISTS stage0.orders_raw UUID '74784f13-4549-491c-83d9-5a40788c91dc' (`order_id` UInt64, `customer_id` UInt64, `order_date` DateTime64(3), `total_amount` Decimal(18, 2), `status` LowCardinality(String), `_operation` LowCardinality(String), `_timestamp` DateTime64(3), `_source_timestamp` DateTime64(3), `_deleted` UInt8 DEFAULT 0, `_version` UInt64, `_kafka_topic` String, `_kafka_partition` UInt64, `_kafka_offset` UInt64) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage0/orders_raw', '{replica}', _version) PARTITION BY toYYYYMM(order_date) ORDER BY (order_id, _timestamp) TTL _timestamp + toIntervalDay(30) SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400 wasn't finished successfully: Code: 450. DB::Exception: TTL expression result column should have DateTime or Date type, but has DateTime64(3). (BAD_TTL_EXPRESSION), Stack trace (when copying this message, always include the lines below):
+
+0. DB::Exception::Exception(DB::Exception::MessageMasked&&, int, bool) @ 0x000000000c8a00db
+1. DB::Exception::Exception<String>(int, FormatStringHelperImpl<std::type_identity<String>::type>, String&&) @ 0x0000000007659b23
+2. DB::TTLDescription::getTTLFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x0000000011729396
+3. DB::TTLTableDescription::getTTLForTableFromAST(std::shared_ptr<DB::IAST> const&, DB::ColumnsDescription const&, std::shared_ptr<DB::Context const>, DB::KeyDescription const&, bool) @ 0x000000001172a37e
+4. DB::create(DB::StorageFactory::Arguments const&) @ 0x0000000011dda045
+5. DB::StorageFactory::get(DB::ASTCreateQuery const&, String const&, std::shared_ptr<DB::Context>, std::shared_ptr<DB::Context>, DB::ColumnsDescription const&, DB::ConstraintsDescription const&, DB::LoadingStrictnessLevel) const @ 0x00000000113e277d
+6. DB::InterpreterCreateQuery::doCreateTable(DB::ASTCreateQuery&, DB::InterpreterCreateQuery::TableProperties const&, std::unique_ptr<DB::DDLGuard, std::default_delete<DB::DDLGuard>>&) @ 0x000000001085a2b6
+7. DB::InterpreterCreateQuery::createTable(DB::ASTCreateQuery&) @ 0x00000000108508c0
+8. DB::InterpreterCreateQuery::execute() @ 0x000000001086168f
+9. DB::executeQueryImpl(char const*, char const*, std::shared_ptr<DB::Context>, DB::QueryFlags, DB::QueryProcessingStage::Enum, DB::ReadBuffer*) @ 0x0000000010f4f7f8
+10. DB::executeQuery(DB::ReadBuffer&, DB::WriteBuffer&, bool, std::shared_ptr<DB::Context>, std::function<void (DB::QueryResultDetails const&)>, DB::QueryFlags, std::optional<DB::FormatSettings> const&, std::function<void (DB::IOutputFormat&)>) @ 0x0000000010f54d32
+11. DB::DDLWorker::tryExecuteQuery(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010219e99
+12. DB::DDLWorker::processTask(DB::DDLTaskBase&, std::shared_ptr<zkutil::ZooKeeper> const&) @ 0x0000000010218155
+13. DB::DDLWorker::scheduleTasks(bool) @ 0x0000000010214e73
+14. DB::DDLWorker::runMainThread() @ 0x000000001020da4e
+15. void std::__function::__policy_invoker<void ()>::__call_impl<std::__function::__default_alloc_func<ThreadFromGlobalPoolImpl<true>::ThreadFromGlobalPoolImpl<void (DB::DDLWorker::*)(), DB::DDLWorker*>(void (DB::DDLWorker::*&&)(), DB::DDLWorker*&&)::'lambda'(), void ()>>(std::__function::__policy_storage const*) @ 0x0000000010228b34
+16. void* std::__thread_proxy[abi:v15000]<std::tuple<std::unique_ptr<std::__thread_struct, std::default_delete<std::__thread_struct>>, void ThreadPoolImpl<std::thread>::scheduleImpl<void>(std::function<void ()>, Priority, std::optional<unsigned long>, bool)::'lambda0'()>>(void*) @ 0x000000000c94f12d
+17. ? @ 0x00007fedbf978609
+18. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 15:52:53.850771 [ 473 ] {9fe7693f-fa9b-4333-9e3d-e839f3977473} <Information> stage0.orders_raw (f87b21bb-d797-426c-a073-cac328033e63): It looks like the table /clickhouse/tables/01/stage0/orders_raw was created by another server at the same moment, will retry
+2025.09.30 15:52:53.890134 [ 473 ] {9fe7693f-fa9b-4333-9e3d-e839f3977473} <Information> stage0.orders_raw (f87b21bb-d797-426c-a073-cac328033e63): Became leader
+2025.09.30 15:52:53.900429 [ 324 ] {} <Information> stage0.orders_raw (f87b21bb-d797-426c-a073-cac328033e63): Replica replica_01 has log pointer '', approximate 1 queue lag and 0 queue size
+2025.09.30 15:52:53.900594 [ 324 ] {} <Information> stage0.orders_raw (f87b21bb-d797-426c-a073-cac328033e63): Not cloning replica_02, it's lost
+2025.09.30 15:52:53.900689 [ 324 ] {} <Information> stage0.orders_raw (f87b21bb-d797-426c-a073-cac328033e63): Will mimic replica_01
+2025.09.30 15:52:53.906252 [ 324 ] {} <Warning> stage0.orders_raw (f87b21bb-d797-426c-a073-cac328033e63): Log pointer of source replica replica_01 changed while we loading queue nodes. Will retry.
+2025.09.30 15:52:58.219209 [ 473 ] {72254eb2-46d3-4b72-9714-c15f2390a724} <Information> stage1.`.inner_id.7758e2f0-8542-4a40-b203-ea11a1f71a2b` (51e02938-c344-4807-9dba-2d623097935c): It looks like the table /clickhouse/tables/01/stage1/orders_clean was created by another server at the same moment, will retry
+2025.09.30 15:52:58.247497 [ 473 ] {72254eb2-46d3-4b72-9714-c15f2390a724} <Information> stage1.`.inner_id.7758e2f0-8542-4a40-b203-ea11a1f71a2b` (51e02938-c344-4807-9dba-2d623097935c): Became leader
+2025.09.30 15:52:58.260439 [ 344 ] {} <Information> stage1.`.inner_id.7758e2f0-8542-4a40-b203-ea11a1f71a2b` (51e02938-c344-4807-9dba-2d623097935c): Not cloning replica_01, it's lost
+2025.09.30 15:52:58.260629 [ 344 ] {} <Information> stage1.`.inner_id.7758e2f0-8542-4a40-b203-ea11a1f71a2b` (51e02938-c344-4807-9dba-2d623097935c): Replica replica_02 has log pointer '', approximate 1 queue lag and 0 queue size
+2025.09.30 15:52:58.260831 [ 344 ] {} <Information> stage1.`.inner_id.7758e2f0-8542-4a40-b203-ea11a1f71a2b` (51e02938-c344-4807-9dba-2d623097935c): Will mimic replica_02
+2025.09.30 15:52:58.267174 [ 344 ] {} <Warning> stage1.`.inner_id.7758e2f0-8542-4a40-b203-ea11a1f71a2b` (51e02938-c344-4807-9dba-2d623097935c): Log pointer of source replica replica_02 changed while we loading queue nodes. Will retry.
+2025.09.30 15:53:03.289497 [ 473 ] {29c641ef-7971-42f7-94fa-567860501408} <Information> stage2.`.inner_id.72cd51d1-c1fa-4bb6-be0a-07c29e4c686b` (c828aa04-b4c4-4eef-9b4a-4efeb3b2de02): Became leader
+2025.09.30 15:53:18.558041 [ 473 ] {221d4e7c-f793-407f-9df0-9ee2b109e8ac} <Information> reports.monthly_business_metrics (b3f1459f-871d-4922-be9d-193684354eae): Became leader
+2025.09.30 15:54:06.762407 [ 473 ] {e9963da8-3439-4a82-b600-2ebbe20760e3} <Information> stage2.`.inner_id.20d8930f-b2dd-4a98-843e-2b25a42461a6` (f028ed82-0bd8-4219-ac1f-388eeccd414a): It looks like the table /clickhouse/tables/01/stage2/daily_sales_summary_simple was created by another server at the same moment, will retry
+2025.09.30 15:54:06.792174 [ 473 ] {e9963da8-3439-4a82-b600-2ebbe20760e3} <Information> stage2.`.inner_id.20d8930f-b2dd-4a98-843e-2b25a42461a6` (f028ed82-0bd8-4219-ac1f-388eeccd414a): Became leader
+2025.09.30 15:54:06.798067 [ 335 ] {} <Information> stage2.`.inner_id.20d8930f-b2dd-4a98-843e-2b25a42461a6` (f028ed82-0bd8-4219-ac1f-388eeccd414a): Not cloning replica_01, it's lost
+2025.09.30 15:54:06.798233 [ 335 ] {} <Information> stage2.`.inner_id.20d8930f-b2dd-4a98-843e-2b25a42461a6` (f028ed82-0bd8-4219-ac1f-388eeccd414a): Replica replica_02 has log pointer '', approximate 1 queue lag and 0 queue size
+2025.09.30 15:54:06.798359 [ 335 ] {} <Information> stage2.`.inner_id.20d8930f-b2dd-4a98-843e-2b25a42461a6` (f028ed82-0bd8-4219-ac1f-388eeccd414a): Will mimic replica_02
+2025.09.30 15:54:06.803460 [ 335 ] {} <Warning> stage2.`.inner_id.20d8930f-b2dd-4a98-843e-2b25a42461a6` (f028ed82-0bd8-4219-ac1f-388eeccd414a): Log pointer of source replica replica_02 changed while we loading queue nodes. Will retry.
+2025.09.30 15:54:11.512530 [ 473 ] {43fc8e79-d7f1-4002-921a-f35c2e1dac39} <Information> stage0.cdc_monitoring (19531107-99c3-436a-a1ed-4bbf4cf4fe49): Became leader
+2025.09.30 15:54:57.537230 [ 2087 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007fedbf978609
+14. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:06:29.610402 [ 2489 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 107, Net Exception: Socket is not connected, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498e292
+1. Poco::Net::SocketImpl::peerAddress() @ 0x00000000149908f6
+2. DB::HTTPServerRequest::HTTPServerRequest(std::shared_ptr<DB::IHTTPContext>, DB::HTTPServerResponse&, Poco::Net::HTTPServerSession&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000012064709
+3. DB::HTTPServerConnection::run() @ 0x0000000012062e68
+4. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+5. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+6. Poco::PooledThread::run() @ 0x0000000014a8bf81
+7. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+8. ? @ 0x00007fedbf978609
+9. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:06:34.608924 [ 2087 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 107, Net Exception: Socket is not connected, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498e292
+1. Poco::Net::SocketImpl::peerAddress() @ 0x00000000149908f6
+2. DB::HTTPServerRequest::HTTPServerRequest(std::shared_ptr<DB::IHTTPContext>, DB::HTTPServerResponse&, Poco::Net::HTTPServerSession&, StrongTypedef<unsigned long, ProfileEvents::EventTag> const&) @ 0x0000000012064709
+3. DB::HTTPServerConnection::run() @ 0x0000000012062e68
+4. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+5. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+6. Poco::PooledThread::run() @ 0x0000000014a8bf81
+7. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+8. ? @ 0x00007fedbf978609
+9. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:09:17.207833 [ 2489 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007fedbf978609
+14. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:12:20.855426 [ 2489 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007fedbf978609
+14. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
+2025.09.30 16:16:21.749147 [ 2489 ] {} <Error> ServerErrorHandler: Poco::Exception. Code: 1000, e.code() = 32, I/O error: Broken pipe, Stack trace (when copying this message, always include the lines below):
+
+0. Poco::Net::SocketImpl::error(int, String const&) @ 0x000000001498eabf
+1. Poco::Net::SocketImpl::sendBytes(void const*, int, int) @ 0x000000001498fb1d
+2. Poco::Net::StreamSocketImpl::sendBytes(void const*, int, int) @ 0x00000000149921f6
+3. Poco::Net::HTTPSession::write(char const*, long) @ 0x000000001497d813
+4. Poco::Net::HTTPHeaderIOS::~HTTPHeaderIOS() @ 0x000000001497877b
+5. Poco::Net::HTTPHeaderOutputStream::~HTTPHeaderOutputStream() @ 0x0000000014978abf
+6. DB::HTTPServerResponse::send() @ 0x0000000012067c88
+7. DB::HTTPServerConnection::sendErrorResponse(Poco::Net::HTTPServerSession&, Poco::Net::HTTPResponse::HTTPStatus) @ 0x0000000012063d3a
+8. DB::HTTPServerConnection::run() @ 0x00000000120639db
+9. Poco::Net::TCPServerConnection::start() @ 0x00000000149929d2
+10. Poco::Net::TCPServerDispatcher::run() @ 0x0000000014993819
+11. Poco::PooledThread::run() @ 0x0000000014a8bf81
+12. Poco::ThreadImpl::runnableEntry(void*) @ 0x0000000014a8a51d
+13. ? @ 0x00007fedbf978609
+14. ? @ 0x00007fedbf89d353
+ (version 24.3.18.7 (official build))
