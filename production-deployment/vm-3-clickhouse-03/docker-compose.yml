@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  clickhouse-03:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: clickhouse-03
+    hostname: clickhouse-03
+    network_mode: host
+    environment:
+      CLICKHOUSE_DB: default
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      # Bind mount к реальному диску (2-4 TB NVMe)
+      - /data/clickhouse:/var/lib/clickhouse
+      # Конфигурационные файлы (скопировать из shared-configs)
+      - /opt/clickhouse/config/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - /opt/clickhouse/config/users.xml:/etc/clickhouse-server/users.d/users.xml
+      # Логи
+      - /var/log/clickhouse:/var/log/clickhouse-server
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

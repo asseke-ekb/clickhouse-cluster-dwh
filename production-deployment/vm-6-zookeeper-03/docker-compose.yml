@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  zookeeper-03:
+    image: zookeeper:3.8
+    container_name: zookeeper-03
+    hostname: zookeeper-03
+    network_mode: host
+    environment:
+      ZOO_MY_ID: 3
+      # Указать реальные IP адреса VM-4, VM-5, VM-6
+      ZOO_SERVERS: server.1=<VM-4-IP>:2888:3888;2181 server.2=<VM-5-IP>:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
+      ZOO_TICK_TIME: 2000
+      ZOO_INIT_LIMIT: 10
+      ZOO_SYNC_LIMIT: 5
+      ZOO_MAX_CLIENT_CNXNS: 0
+    volumes:
+      # Bind mount к реальному диску
+      - /data/zookeeper:/data
+      - /var/log/zookeeper:/datalog
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "zkServer.sh", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <!-- ==================== PROFILES ==================== -->
+    <profiles>
+        <!-- Default profile settings -->
+        <default>
+            <max_memory_usage>10000000000</max_memory_usage>
+            <use_uncompressed_cache>0</use_uncompressed_cache>
+            <load_balancing>random</load_balancing>
+            <log_queries>1</log_queries>
+        </default>
+
+        <!-- Admin Profile: Без ограничений -->
+        <admin_profile>
+            <max_memory_usage>0</max_memory_usage>
+            <max_execution_time>0</max_execution_time>
+            <max_rows_to_read>0</max_rows_to_read>
+            <max_bytes_to_read>0</max_bytes_to_read>
+            <readonly>0</readonly>
+        </admin_profile>
+    </profiles>
+
+    <!-- ==================== QUOTAS ==================== -->
+    <quotas>
+        <!-- Default quota: no restrictions -->
+        <default>
+            <interval>
+                <duration>3600</duration>
+                <queries>0</queries>
+                <errors>0</errors>
+                <result_rows>0</result_rows>
+                <read_rows>0</read_rows>
+                <execution_time>0</execution_time>
+            </interval>
+        </default>
+    </quotas>
+
+    <!-- ==================== USERS ==================== -->
+    <users>
+        <!-- Default user для внутреннего использования -->
+        <default>
+            <password></password>
+            <networks>
+                <ip>::1</ip>
+                <ip>127.0.0.1</ip>
+            </networks>
+            <profile>default</profile>
+            <quota>default</quota>
+        </default>
+
+        <!-- Admin User -->
+        <admin>
+            <!-- ВАЖНО: Замените на свой пароль перед развертыванием! -->
+            <password>CHANGE_ME_ADMIN_PASSWORD</password>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <profile>admin_profile</profile>
+            <quota>default</quota>
+            <access_management>1</access_management>
+        </admin>
+    </users>
+</clickhouse>
