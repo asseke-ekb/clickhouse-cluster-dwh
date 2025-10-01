@@ -1,125 +1,198 @@
-# ClickHouse DWH Cluster - Документация
+# ClickHouse DWH Cluster - Production Documentation
 
-## Оглавление
-1. [Обзор архитектуры](#обзор-архитектуры)
-2. [Требования к инфраструктуре](#требования-к-инфраструктуре)
-3. [Топология кластера](#топология-кластера)
-4. [Конфигурация компонентов](#конфигурация-компонентов)
+## Содержание
+1. [Обзор проекта](#обзор-проекта)
+2. [Архитектура кластера](#архитектура-кластера)
+3. [Требования к инфраструктуре](#требования-к-инфраструктуре)
+4. [Топология и конфигурация](#топология-и-конфигурация)
 5. [Балансировка нагрузки](#балансировка-нагрузки)
-6. [Развертывание](#развертывание)
-7. [Управление пользователями и RBAC](#управление-пользователями-и-rbac)
-8. [Мониторинг](#мониторинг)
-9. [Производительность](#производительность)
-10. [Резервное копирование](#резервное-копирование)
-11. [Troubleshooting](#troubleshooting)
+6. [Управление пользователями (RBAC)](#управление-пользователями-rbac)
+7. [Мониторинг и метрики](#мониторинг-и-метрики)
+8. [Производительность и оптимизация](#производительность-и-оптимизация)
+9. [Резервное копирование](#резервное-копирование)
+10. [Troubleshooting](#troubleshooting)
 
 ---
 
-## Обзор архитектуры
+## Обзор проекта
 
-Отказоустойчивый кластер ClickHouse для построения Data Warehouse с полным стеком мониторинга и интеллектуальной балансировкой нагрузки.
+Отказоустойчивый кластер ClickHouse для построения корпоративного Data Warehouse с интеллектуальной балансировкой нагрузки и полным стеком мониторинга.
 
 ### Ключевые характеристики
-- **Топология**: 1 шард, 3 реплики (полная репликация данных)
-- **Отказоустойчивость**: Работа при падении до 1 ноды ClickHouse и 1 ноды ZooKeeper
-- **Разделение нагрузки**: ETL/запись, аналитика, тяжелые отчеты
-- **Мониторинг**: Prometheus + Grafana
-- **Версии**: ClickHouse 24.3, ZooKeeper 3.8, HAProxy 2.8
 
-### Архитектурная диаграмма
+**Топология**:
+- 1 шард, 3 реплики (полная репликация данных)
+- Специализация нод: Write-optimized (Node-01) + Read-optimized (Node-02/03)
+
+**Отказоустойчивость**:
+- ZooKeeper quorum (3 ноды) - работа при падении 1 ноды
+- ClickHouse replicas (3 ноды) - работа при падении до 1 ноды
+- Автоматическое восстановление данных через репликацию
+
+**Технологический стек**:
+- ClickHouse 24.3 (колоночная СУБД для аналитики)
+- ZooKeeper 3.8 (координация и консенсус)
+- HAProxy 2.8 (балансировщик нагрузки)
+- Prometheus + Grafana (мониторинг)
+
+---
+
+## Архитектура кластера
+
+### Диаграмма компонентов
+
 ```
-                    ┌──────────────┐
-                    │   HAProxy    │
-                    │  Load Balancer│
-                    └──────┬───────┘
-                           │
-        ┌──────────────────┼──────────────────┐
-        │                  │                  │
-        ▼                  ▼                  ▼
-┌───────────────┐  ┌───────────────┐  ┌───────────────┐
-│ ClickHouse-01 │  │ ClickHouse-02 │  │ ClickHouse-03 │
-│ (Write-heavy) │  │ (Read-heavy)  │  │ (Read-heavy)  │
-│ replica_01    │  │ replica_02    │  │ replica_03    │
-└───────┬───────┘  └───────┬───────┘  └───────┬───────┘
-        │                  │                  │
-        └──────────────────┼──────────────────┘
-                           │
-                ┌──────────┴──────────┐
-                │  ZooKeeper Ensemble  │
-                │   (3 ноды, quorum)   │
-                └─────────────────────┘
+                        ┌─────────────────┐
+                        │   HAProxy LB    │
+                        │  (VM-7)         │
+                        │  8080-82, 9090-91│
+                        └────────┬────────┘
+                                 │
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+              ▼                  ▼                  ▼
+    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+    │ ClickHouse-01   │ │ ClickHouse-02   │ │ ClickHouse-03   │
+    │ (VM-1)          │ │ (VM-2)          │ │ (VM-3)          │
+    │ Write-heavy     │ │ Read-heavy      │ │ Read-heavy      │
+    │ replica_01      │ │ replica_02      │ │ replica_03      │
+    └────────┬────────┘ └────────┬────────┘ └────────┬────────┘
+             │                   │                   │
+             └───────────────────┼───────────────────┘
+                                 │
+                      ┌──────────┴──────────┐
+                      │  ZooKeeper Ensemble  │
+                      │  (VM-4, VM-5, VM-6)  │
+                      │  Quorum: 2 of 3      │
+                      └─────────────────────┘
+
+                      ┌─────────────────────┐
+                      │  Monitoring (VM-7)  │
+                      │  Prometheus:9099    │
+                      │  Grafana:3000       │
+                      └─────────────────────┘
 ```
+
+### Принцип работы
+
+**Запись данных (INSERT)**:
+1. Запрос приходит на HAProxy (порт 8080 ETL endpoint)
+2. HAProxy направляет на ClickHouse-01 (write-optimized)
+3. ClickHouse-01 записывает данные локально
+4. ZooKeeper фиксирует операцию в replicated log
+5. ClickHouse-02 и ClickHouse-03 копируют данные (или готовые части после merge)
+
+**Чтение данных (SELECT)**:
+1. **Аналитика**: HAProxy (8081) → равномерно на все 3 ноды (balance leastconn)
+2. **Отчеты**: HAProxy (8082) → приоритет на Node-02/03 (balance source)
+3. Все ноды имеют одинаковые данные → любая может ответить на запрос
 
 ---
 
 ## Требования к инфраструктуре
 
-### Вариант 3: Продакшн-окружение (рекомендуемый)
+### Виртуальные машины (Production)
 
-#### Виртуальные машины
+#### ClickHouse Nodes (VM-1, VM-2, VM-3)
 
-##### VM-1, VM-2, VM-3: ClickHouse Nodes
+**Характеристики каждой VM**:
 ```yaml
-Количество: 3 VM
 CPU: 16-32 cores (физических)
 RAM: 64-128 GB
-Disk: 2-4 TB NVMe SSD (RAID10 для надежности)
+Disk: 2-4 TB NVMe SSD (RAID10 рекомендуется)
 Network: 10 Gbps
-OS: Ubuntu 22.04 LTS или RHEL 8+
+OS: Ubuntu 22.04 LTS / RHEL 8+
 ```
 
-##### VM-4, VM-5, VM-6: ZooKeeper Nodes
+**Расчет ресурсов под вашу нагрузку**:
+- Текущие данные: ~5B записей = 2.4 TB (с репликацией ×3)
+- Прирост: 1.5M-8M строк/день = ~840 GB/год (с репликацией)
+- **Рекомендация**: 2 TB на ноду хватит на 2-3 года
+
+**Обоснование ресурсов**:
+- **CPU 16-32 cores**: ClickHouse параллелизует запросы по ядрам
+- **RAM 64-128 GB**:
+  - Node-01: 90% для буферов INSERT и background merges
+  - Node-02/03: 85% для кэширования (mark cache 10GB + uncompressed cache 20GB)
+- **Disk 2-4 TB NVMe**:
+  - Высокая скорость записи для ETL
+  - Низкая latency для аналитических запросов
+
+#### ZooKeeper Nodes (VM-4, VM-5, VM-6)
+
+**Характеристики каждой VM**:
 ```yaml
-Количество: 3 VM
 CPU: 4 cores
 RAM: 8 GB
 Disk: 100 GB SSD
 Network: 1 Gbps
-OS: Ubuntu 22.04 LTS или RHEL 8+
+OS: Ubuntu 22.04 LTS / RHEL 8+
 ```
 
-##### VM-7: HAProxy + Monitoring
+**Обоснование**:
+- ZooKeeper хранит только метаданные (KB-MB размер)
+- Требователен к latency диска (SSD обязательно)
+- 3 ноды = quorum (работает при падении 1 ноды)
+
+#### Infrastructure Node (VM-7)
+
+**Характеристики**:
 ```yaml
-Количество: 1 VM
 CPU: 4-8 cores
 RAM: 16 GB
 Disk: 200 GB SSD
-Network: 10 Gbps
+Network: 10 Gbps (для HAProxy)
 OS: Ubuntu 22.04 LTS
 ```
 
-#### Сетевые требования
-- **Внутренняя сеть**: Выделенная VLAN между всеми нодами (низкая latency <1ms)
-- **Firewall правила**: См. раздел [Сетевая безопасность](#сетевая-безопасность)
-- **DNS**: Все хосты должны резолвиться по именам (clickhouse-01, clickhouse-02, и т.д.)
+**Сервисы**:
+- HAProxy (балансировщик)
+- Prometheus (метрики, retention 30 дней)
+- Grafana (визуализация)
 
-#### Расчет ресурсов под текущую нагрузку
+### Сетевые требования
 
-**Данные**:
-- История: ~5 млрд записей (2.4 TB с репликацией)
-- Прирост: 1.5M - 8M строк/день (~840 GB/год с репликацией)
-- Таблиц: 15-20 в stage0
+**Внутренняя сеть**:
+- Выделенная VLAN между всеми нодами
+- Latency < 1ms (критично для ZooKeeper)
+- Bandwidth: 10 Gbps для ClickHouse нод
 
-**Хранилище**:
-- Текущие данные: 2.4 TB
-- Прирост за 2 года: +1.68 TB
-- Итого через 2 года: ~4 TB
-- **Рекомендация**: 2 TB на ноду (6 TB суммарно), расширение через 2-3 года
+**Firewall правила**:
 
-**Производительность**:
-- INSERT: 17-92 строки/сек (легкая нагрузка для кластера)
-- SELECT (analytics): 200-500 одновременных запросов
-- SELECT (reports): 10-50 тяжелых запросов
+| VM | Порты | Назначение |
+|----|-------|------------|
+| VM-1,2,3 | 8123 | ClickHouse HTTP API |
+| VM-1,2,3 | 9000 | ClickHouse Native protocol |
+| VM-1,2,3 | 9009 | ClickHouse Interserver (репликация) |
+| VM-1,2,3 | 9363 | Prometheus metrics |
+| VM-4,5,6 | 2181 | ZooKeeper client |
+| VM-4,5,6 | 2888 | ZooKeeper peer |
+| VM-4,5,6 | 3888 | ZooKeeper election |
+| VM-7 | 8080-8082 | HAProxy HTTP frontends |
+| VM-7 | 9090-9091 | HAProxy TCP frontends |
+| VM-7 | 8404 | HAProxy stats UI |
+| VM-7 | 9099 | Prometheus |
+| VM-7 | 3000 | Grafana |
+
+**DNS/Hosts**:
+Все хосты должны резолвиться по именам (через `/etc/hosts` или DNS):
+```
+<VM-1-IP>  clickhouse-01
+<VM-2-IP>  clickhouse-02
+<VM-3-IP>  clickhouse-03
+<VM-4-IP>  zookeeper-01
+<VM-5-IP>  zookeeper-02
+<VM-6-IP>  zookeeper-03
+<VM-7-IP>  haproxy prometheus grafana
+```
 
 ---
 
-## Топология кластера
+## Топология и конфигурация
 
-### ClickHouse Cluster Configuration
+### ClickHouse Cluster: `dwh_cluster`
 
-**Имя кластера**: `dwh_cluster`
-**Шарды**: 1
-**Реплики на шард**: 3
+**Конфигурация кластера** (одинакова на всех 3 нодах):
 
 ```xml
 <remote_servers>
@@ -143,60 +216,47 @@ OS: Ubuntu 22.04 LTS
 </remote_servers>
 ```
 
+**Параметры**:
+- `internal_replication=true` - данные реплицируются автоматически через ZooKeeper
+- 1 шард = все данные на всех нодах (полная репликация)
+- 3 реплики = отказоустойчивость
+
 ### Специализация нод
 
 | Нода | Replica ID | Роль | Оптимизация |
 |------|------------|------|-------------|
-| clickhouse-01 | replica_01 | ETL/Write | Агрессивный merge, больше background pools |
-| clickhouse-02 | replica_02 | Analytics/Read | Большие кэши, копирование готовых частей |
-| clickhouse-03 | replica_03 | Reports/Read | Большие кэши, копирование готовых частей |
-
----
-
-## Конфигурация компонентов
+| clickhouse-01 | replica_01 | **ETL/Write** | Агрессивный merge, больше background threads |
+| clickhouse-02 | replica_02 | **Analytics/Read** | Большие кэши, копирование готовых частей |
+| clickhouse-03 | replica_03 | **Reports/Read** | Большие кэши, копирование готовых частей |
 
 ### ClickHouse Node-01 (Write-optimized)
 
-**IP**: `<VM-1-IP>`
-**Hostname**: `clickhouse-01`
+**Файл**: `production-deployment/shared-configs/clickhouse-01/config.xml`
 
-#### Сетевые порты
-- `8123` - HTTP API
-- `9000` - Native TCP protocol
-- `9009` - Interserver HTTP (репликация)
-- `9363` - Prometheus metrics
+**Ключевые параметры**:
 
-#### Ключевые параметры конфигурации
 ```xml
-<!-- config/clickhouse-01/config.xml -->
-
-<!-- Память -->
+<!-- Память: 90% RAM для буферов и merges -->
 <max_server_memory_usage_to_ram_ratio>0.9</max_server_memory_usage_to_ram_ratio>
 <max_concurrent_queries>100</max_concurrent_queries>
 
-<!-- Кэши (меньше для write-нагрузки) -->
+<!-- Кэши: меньше для write-нагрузки -->
 <mark_cache_size>5368709120</mark_cache_size>           <!-- 5 GB -->
 <uncompressed_cache_size>10737418240</uncompressed_cache_size> <!-- 10 GB -->
 
-<!-- Background операции (агрессивный merge) -->
+<!-- Background операции: агрессивный merge -->
 <background_pool_size>32</background_pool_size>
 <background_schedule_pool_size>128</background_schedule_pool_size>
 <background_merges_mutations_concurrency_ratio>4</background_merges_mutations_concurrency_ratio>
 
-<!-- MergeTree настройки -->
+<!-- MergeTree: максимальные размеры для merge -->
 <merge_tree>
     <max_bytes_to_merge_at_max_space_in_pool>161061273600</max_bytes_to_merge_at_max_space_in_pool>
     <max_replicated_merges_in_queue>32</max_replicated_merges_in_queue>
 </merge_tree>
-
-<!-- Kafka (если используется) -->
-<kafka>
-    <kafka_poll_timeout_ms>5000</kafka_poll_timeout_ms>
-    <kafka_flush_interval_ms>7500</kafka_flush_interval_ms>
-</kafka>
 ```
 
-#### Макросы
+**Макросы**:
 ```xml
 <macros>
     <shard>01</shard>
@@ -205,70 +265,48 @@ OS: Ubuntu 22.04 LTS
 </macros>
 ```
 
----
+**Зачем такая конфигурация**:
+- **32 background pools** - быстро мержит данные после INSERT
+- **161 GB max merge size** - склеивает много мелких частей в большие
+- **Меньше кэшей** - память идет на буферы вставки
 
 ### ClickHouse Node-02/03 (Read-optimized)
 
-**Node-02 IP**: `<VM-2-IP>`
-**Node-03 IP**: `<VM-3-IP>`
-**Hostname**: `clickhouse-02`, `clickhouse-03`
+**Файлы**: `clickhouse-02/config.xml`, `clickhouse-03/config.xml`
 
-#### Ключевые параметры конфигурации
+**Ключевые параметры**:
+
 ```xml
-<!-- config/clickhouse-02/config.xml, config/clickhouse-03/config.xml -->
-
-<!-- Память -->
+<!-- Память: 85% RAM (больше для кэшей) -->
 <max_server_memory_usage_to_ram_ratio>0.85</max_server_memory_usage_to_ram_ratio>
 <max_concurrent_queries>150</max_concurrent_queries>
 
-<!-- Кэши (больше для read-нагрузки) -->
+<!-- Кэши: удвоенные для read-нагрузки -->
 <mark_cache_size>10737418240</mark_cache_size>          <!-- 10 GB -->
 <uncompressed_cache_size>21474836480</uncompressed_cache_size> <!-- 20 GB -->
 
-<!-- Background операции (ленивый merge) -->
+<!-- Background операции: ленивый merge -->
 <background_pool_size>16</background_pool_size>
 <background_schedule_pool_size>64</background_schedule_pool_size>
 <background_merges_mutations_concurrency_ratio>2</background_merges_mutations_concurrency_ratio>
 
-<!-- MergeTree настройки -->
+<!-- MergeTree: копирование готовых частей вместо merge -->
 <merge_tree>
     <max_bytes_to_merge_at_max_space_in_pool>107374182400</max_bytes_to_merge_at_max_space_in_pool>
     <max_replicated_merges_in_queue>16</max_replicated_merges_in_queue>
-    <!-- Копировать готовые части с Node-01 вместо самостоятельного merge -->
     <prefer_fetch_merged_part_size_threshold>536870912</prefer_fetch_merged_part_size_threshold>
 </merge_tree>
 ```
 
-#### Макросы
-```xml
-<!-- Node-02 -->
-<macros>
-    <shard>01</shard>
-    <replica>replica_02</replica>
-    <cluster>dwh_cluster</cluster>
-</macros>
+**Зачем такая конфигурация**:
+- **Больше кэшей** (10+20 GB) - ускоряют SELECT запросы
+- **150 concurrent queries** - больше параллельных запросов
+- **prefer_fetch_merged_part_size_threshold** - копируют готовые части с Node-01 вместо самостоятельного merge (экономят CPU для SELECT)
 
-<!-- Node-03 -->
-<macros>
-    <shard>01</shard>
-    <replica>replica_03</replica>
-    <cluster>dwh_cluster</cluster>
-</macros>
-```
+### ZooKeeper Configuration
 
----
+**Конфигурация в ClickHouse** (одинакова на всех нодах):
 
-### ZooKeeper Ensemble
-
-**Ноды**: 3 (обеспечивают quorum)
-
-| Hostname | IP | Client Port | Peer Port | Election Port |
-|----------|-----|-------------|-----------|---------------|
-| zookeeper-01 | `<VM-4-IP>` | 2181 | 2888 | 3888 |
-| zookeeper-02 | `<VM-5-IP>` | 2181 | 2888 | 3888 |
-| zookeeper-03 | `<VM-6-IP>` | 2181 | 2888 | 3888 |
-
-#### Конфигурация в ClickHouse
 ```xml
 <zookeeper>
     <node>
@@ -286,562 +324,181 @@ OS: Ubuntu 22.04 LTS
     <session_timeout_ms>30000</session_timeout_ms>
     <operation_timeout_ms>10000</operation_timeout_ms>
 </zookeeper>
+
+<distributed_ddl>
+    <path>/clickhouse/task_queue/ddl</path>
+</distributed_ddl>
 ```
 
-#### Параметры ZooKeeper
-```
-ZOO_MY_ID: 1, 2, 3 (для каждой ноды соответственно)
+**Docker Compose для каждой ZK ноды**:
+
+Каждая нода ZooKeeper запускается на отдельной VM с параметрами:
+```yaml
+ZOO_MY_ID: 1, 2, 3  # Уникальный ID для каждой ноды
+ZOO_SERVERS: server.1=zookeeper-01:2888:3888;2181 server.2=... server.3=...
 ZOO_TICK_TIME: 2000
 ZOO_INIT_LIMIT: 10
 ZOO_SYNC_LIMIT: 5
-ZOO_MAX_CLIENT_CNXNS: 0 (без ограничений)
 ```
 
----
-
-### HAProxy Load Balancer
-
-**Hostname**: `haproxy`
-**IP**: `<VM-7-IP>`
-
-#### Endpoints и порты
-
-| Endpoint | Порт | Протокол | Назначение | Backend |
-|----------|------|----------|------------|---------|
-| ETL | 8080 | HTTP | Массовые INSERT | clickhouse-01 (priority) |
-| ETL TCP | 9090 | TCP | Native protocol INSERT | clickhouse-01 (priority) |
-| Analytics | 8081 | HTTP | Быстрые SELECT | Все ноды (leastconn) |
-| Analytics TCP | 9091 | TCP | Native protocol SELECT | Все ноды (leastconn) |
-| Reports | 8082 | HTTP | Тяжелые отчеты | Node-02/03 (source hash) |
-| Stats UI | 8404 | HTTP | HAProxy статистика | - |
-
-#### Стратегии балансировки
-
-**ETL (8080, 9090)**:
-```
-balance first
-server clickhouse-01 primary
-server clickhouse-02 backup
-server clickhouse-03 backup
-timeout server 600s
-```
-- Всегда использует Node-01
-- Node-02/03 только при падении Node-01
-- Длинный timeout для batch INSERT
-
-**Analytics (8081, 9091)**:
-```
-balance leastconn
-server clickhouse-01
-server clickhouse-02
-server clickhouse-03
-timeout server 30s
-```
-- Равномерное распределение по нагрузке
-- Выбирает ноду с минимумом активных соединений
-
-**Reports (8082)**:
-```
-balance source
-server clickhouse-02
-server clickhouse-03
-server clickhouse-01 backup
-timeout server 1800s
-```
-- Клиент всегда попадает на одну ноду (hash IP)
-- Node-01 только как резервный
-- Очень длинный timeout (30 минут)
-
-#### Health Checks
-```
-option httpchk GET /ping
-http-check expect status 200
-check inter 2000 rise 2 fall 3
-```
-- Проверка каждые 2 секунды
-- 2 успешных проверки → нода "вверх"
-- 3 провала → нода "вниз"
-
----
-
-### Prometheus
-
-**Hostname**: `prometheus`
-**IP**: `<VM-7-IP>`
-**Порт**: 9099
-
-#### Targets (что мониторится)
-- ClickHouse-01: `http://clickhouse-01:9363/metrics`
-- ClickHouse-02: `http://clickhouse-02:9363/metrics`
-- ClickHouse-03: `http://clickhouse-03:9363/metrics`
-- HAProxy: `http://haproxy:8404/stats` (через exporter)
-
-#### Retention
-- Хранение метрик: 30 дней
-- Path: `/prometheus` (persistent volume)
-
----
-
-### Grafana
-
-**Hostname**: `grafana`
-**IP**: `<VM-7-IP>`
-**Порт**: 3000
-
-#### Credentials
-- **Username**: `admin`
-- **Password**: `admin123` ⚠️ **ИЗМЕНИТЬ ПОСЛЕ УСТАНОВКИ**
-
-#### Datasources
-- Prometheus: `http://prometheus:9090`
-- ClickHouse: `http://clickhouse-01:8123` (через плагин grafana-clickhouse-datasource)
+**Роль ZooKeeper**:
+- Координация репликации (кто leader, кто follower)
+- Хранение метаданных о частях таблиц
+- Distributed DDL (DDL выполняется на всех нодах кластера)
 
 ---
 
 ## Балансировка нагрузки
 
-### Принцип работы
+### HAProxy: интеллектуальная маршрутизация
 
-#### 1. Разделение по типу нагрузки
+**Файл**: `production-deployment/shared-configs/haproxy.cfg`
 
-**Почему важно**:
-- INSERT блокирует части таблицы → мешает SELECT
-- Тяжелые JOIN нагружают CPU → замедляют быстрые запросы
-- Разные типы запросов требуют разных ресурсов
+### Endpoints и стратегии
 
-**Решение**:
-- ETL → Node-01 (изолирован от read-нагрузки)
-- Analytics → Все ноды (параллелизм)
-- Reports → Node-02/03 (не мешают ETL)
+| Endpoint | Порт | Протокол | Назначение | Backend | Стратегия |
+|----------|------|----------|------------|---------|-----------|
+| ETL | 8080 | HTTP | Массовые INSERT | clickhouse-01 | `balance first` |
+| ETL TCP | 9090 | TCP | Native INSERT | clickhouse-01 | `balance first` |
+| Analytics | 8081 | HTTP | Быстрые SELECT | Все ноды | `balance leastconn` |
+| Analytics TCP | 9091 | TCP | Native SELECT | Все ноды | `balance leastconn` |
+| Reports | 8082 | HTTP | Тяжелые отчеты | Node-02/03 | `balance source` |
+| Stats | 8404 | HTTP | Статистика HAProxy | - | - |
 
-#### 2. Оптимизация конфигураций
+### Стратегия 1: ETL (8080, 9090)
 
-**Node-01 (Write)**:
-- ✅ Агрессивно мержит данные сразу после INSERT
-- ✅ Больше потоков для background операций
-- ✅ Меньше кэшей (память для буферов вставки)
-- ❌ Не оптимален для чтения (части еще не смержены)
+```cfg
+backend clickhouse_etl_http
+    mode http
+    balance first  # Всегда первый доступный сервер
+    timeout server 600s  # 10 минут для batch INSERT
 
-**Node-02/03 (Read)**:
-- ✅ Копируют готовые смерженные части с Node-01
-- ✅ Большие кэши для ускорения SELECT
-- ✅ Больше параллельных запросов
-- ❌ Не оптимальны для записи (меньше merge потоков)
+    server clickhouse-01 clickhouse-01:8123 check
+    server clickhouse-02 clickhouse-02:8123 check backup
+    server clickhouse-03 clickhouse-03:8123 check backup
+```
 
-#### 3. Репликация
+**Как работает**:
+1. Все INSERT идут на **clickhouse-01** (write-optimized)
+2. Node-02/03 помечены как `backup` → включаются только если Node-01 down
+3. Node-01 мержит данные → Node-02/03 копируют готовые части
 
-**Механизм**:
-1. INSERT приходит на Node-01 через HAProxy (порт 8080)
-2. Node-01 записывает данные локально
-3. ZooKeeper фиксирует операцию в логе репликации
-4. Node-02 и Node-03 получают уведомление от ZK
-5. Node-02/03 копируют данные (или готовые части) с Node-01
+**Преимущества**:
+- INSERT изолирован от SELECT (не блокирует аналитику)
+- Node-01 сфокусирован на быстрых merges
+- При падении Node-01 запись переключается на Node-02
 
-**Консистентность**:
-- `internal_replication=true` → данные реплицируются автоматически
-- Кворум ZooKeeper (2 из 3 нод) → защита от split-brain
-- Все реплики имеют одинаковые данные (eventual consistency)
+### Стратегия 2: Analytics (8081, 9091)
+
+```cfg
+backend clickhouse_analytics_http
+    mode http
+    balance leastconn  # Наименьшее число активных соединений
+    timeout server 30s  # Быстрые запросы
+
+    server clickhouse-01 clickhouse-01:8123 check
+    server clickhouse-02 clickhouse-02:8123 check
+    server clickhouse-03 clickhouse-03:8123 check
+```
+
+**Как работает**:
+1. Запрос идет на ноду с **минимальным числом активных подключений**
+2. Равномерная нагрузка на все 3 ноды
+3. Короткий timeout (30s) для быстрых запросов
+
+**Преимущества**:
+- Максимальная параллелизация (3 ноды обрабатывают запросы)
+- Автоматическое выравнивание нагрузки
+- Отказоустойчивость при падении любой ноды
+
+### Стратегия 3: Reports (8082)
+
+```cfg
+backend clickhouse_reports_http
+    mode http
+    balance source  # Hash от IP клиента
+    timeout server 1800s  # 30 минут для тяжелых отчетов
+
+    server clickhouse-02 clickhouse-02:8123 check
+    server clickhouse-03 clickhouse-03:8123 check
+    server clickhouse-01 clickhouse-01:8123 check backup
+```
+
+**Как работает**:
+1. Один клиент всегда попадает на одну ноду (hash IP адреса)
+2. Приоритет на **Node-02/03** (read-optimized, большие кэши)
+3. Node-01 только как резервный (освобожден для ETL)
+
+**Преимущества**:
+- Стабильность для долгих запросов (один клиент = одна нода)
+- Кэширование результатов на уровне ноды
+- Не мешает ETL (Node-01 в backup)
+
+### Health Checks
+
+```cfg
+option httpchk GET /ping
+http-check expect status 200
+check inter 2000 rise 2 fall 3
+```
+
+**Параметры**:
+- Проверка каждые **2 секунды**
+- **2 успешных проверки** → нода UP
+- **3 провала** → нода DOWN
 
 ---
 
-## Развертывание
-
-### Подготовка инфраструктуры
-
-#### 1. Создание виртуальных машин
-
-```bash
-# Пример для VMware/Proxmox/OpenStack
-# Создать 7 VM согласно спецификации выше
-```
-
-#### 2. Настройка DNS/Hosts
-
-На **всех 7 VM** добавить в `/etc/hosts`:
-
-```bash
-# ClickHouse Nodes
-<VM-1-IP>  clickhouse-01
-<VM-2-IP>  clickhouse-02
-<VM-3-IP>  clickhouse-03
-
-# ZooKeeper Nodes
-<VM-4-IP>  zookeeper-01
-<VM-5-IP>  zookeeper-02
-<VM-6-IP>  zookeeper-03
-
-# HAProxy + Monitoring
-<VM-7-IP>  haproxy prometheus grafana
-```
-
-#### 3. Настройка Firewall
-
-**На VM-1, VM-2, VM-3 (ClickHouse)**:
-```bash
-# ClickHouse порты
-sudo firewall-cmd --permanent --add-port=8123/tcp  # HTTP API
-sudo firewall-cmd --permanent --add-port=9000/tcp  # Native protocol
-sudo firewall-cmd --permanent --add-port=9009/tcp  # Interserver
-sudo firewall-cmd --permanent --add-port=9363/tcp  # Prometheus metrics
-sudo firewall-cmd --reload
-```
-
-**На VM-4, VM-5, VM-6 (ZooKeeper)**:
-```bash
-sudo firewall-cmd --permanent --add-port=2181/tcp  # Client
-sudo firewall-cmd --permanent --add-port=2888/tcp  # Peer
-sudo firewall-cmd --permanent --add-port=3888/tcp  # Election
-sudo firewall-cmd --reload
-```
-
-**На VM-7 (HAProxy)**:
-```bash
-sudo firewall-cmd --permanent --add-port=8080-8082/tcp  # HAProxy frontends
-sudo firewall-cmd --permanent --add-port=8404/tcp       # Stats
-sudo firewall-cmd --permanent --add-port=9090-9091/tcp  # TCP frontends
-sudo firewall-cmd --permanent --add-port=9099/tcp       # Prometheus
-sudo firewall-cmd --permanent --add-port=3000/tcp       # Grafana
-sudo firewall-cmd --reload
-```
-
-#### 4. Установка Docker и Docker Compose
-
-На **всех VM**:
-
-```bash
-# Ubuntu 22.04
-sudo apt-get update
-sudo apt-get install -y ca-certificates curl gnupg lsb-release
-
-# Добавить Docker GPG key
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-# Добавить репозиторий
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Установить Docker
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-# Проверить установку
-docker --version
-docker compose version
-```
-
----
-
-### Развертывание компонентов
-
-#### VM-4, VM-5, VM-6: ZooKeeper Nodes
-
-**На каждой VM создать docker-compose.yml**:
-
-**VM-4 (zookeeper-01)**:
-```yaml
-version: '3.8'
-
-networks:
-  clickhouse-net:
-    driver: bridge
-
-volumes:
-  zookeeper-data:
-
-services:
-  zookeeper:
-    image: zookeeper:3.8
-    container_name: zookeeper-01
-    hostname: zookeeper-01
-    networks:
-      - clickhouse-net
-    ports:
-      - "2181:2181"
-      - "2888:2888"
-      - "3888:3888"
-    environment:
-      ZOO_MY_ID: 1
-      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zookeeper-02:2888:3888;2181 server.3=zookeeper-03:2888:3888;2181
-      ZOO_TICK_TIME: 2000
-      ZOO_INIT_LIMIT: 10
-      ZOO_SYNC_LIMIT: 5
-      ZOO_MAX_CLIENT_CNXNS: 0
-    volumes:
-      - zookeeper-data:/data
-      - ./logs:/datalog
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "zkServer.sh", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-```
-
-**VM-5 (zookeeper-02)**: Изменить `ZOO_MY_ID: 2`, hostname, container_name
-
-**VM-6 (zookeeper-03)**: Изменить `ZOO_MY_ID: 3`, hostname, container_name
-
-Запустить:
-```bash
-sudo docker compose up -d
-```
-
----
-
-#### VM-1, VM-2, VM-3: ClickHouse Nodes
-
-**Подготовка конфигураций**:
-
-1. Скопировать файлы из репозитория на каждую VM:
-   - `config/clickhouse-0X/config.xml`
-   - `config/users.xml`
-
-2. Создать структуру:
-```bash
-mkdir -p /opt/clickhouse/config
-mkdir -p /opt/clickhouse/logs
-```
-
-**VM-1 (clickhouse-01)**:
-```yaml
-version: '3.8'
-
-networks:
-  clickhouse-net:
-    driver: bridge
-
-volumes:
-  clickhouse-data:
-
-services:
-  clickhouse:
-    image: clickhouse/clickhouse-server:24.3
-    container_name: clickhouse-01
-    hostname: clickhouse-01
-    networks:
-      - clickhouse-net
-    ports:
-      - "8123:8123"
-      - "9000:9000"
-      - "9009:9009"
-      - "9363:9363"
-    volumes:
-      - clickhouse-data:/var/lib/clickhouse
-      - /opt/clickhouse/config/config.xml:/etc/clickhouse-server/config.d/config.xml
-      - /opt/clickhouse/config/users.xml:/etc/clickhouse-server/users.d/users.xml
-      - /opt/clickhouse/logs:/var/log/clickhouse-server
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-```
-
-**VM-2, VM-3**: Аналогично, изменить hostname, container_name, конфиг файл
-
-Запустить:
-```bash
-sudo docker compose up -d
-```
-
----
-
-#### VM-7: HAProxy + Prometheus + Grafana
-
-**Структура**:
-```bash
-mkdir -p /opt/haproxy/config
-mkdir -p /opt/prometheus/config
-mkdir -p /opt/grafana/provisioning
-```
-
-**docker-compose.yml**:
-```yaml
-version: '3.8'
-
-networks:
-  clickhouse-net:
-    driver: bridge
-
-volumes:
-  prometheus-data:
-  grafana-data:
-
-services:
-  haproxy:
-    image: haproxy:2.8
-    container_name: haproxy
-    hostname: haproxy
-    networks:
-      - clickhouse-net
-    ports:
-      - "8080:8080"
-      - "8081:8081"
-      - "8082:8082"
-      - "8404:8404"
-      - "9090:9090"
-      - "9091:9091"
-    volumes:
-      - /opt/haproxy/config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "haproxy", "-c", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    hostname: prometheus
-    networks:
-      - clickhouse-net
-    ports:
-      - "9099:9090"
-    volumes:
-      - /opt/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
-    restart: unless-stopped
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    hostname: grafana
-    networks:
-      - clickhouse-net
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - /opt/grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin123
-      GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
-      GF_USERS_ALLOW_SIGN_UP: false
-    restart: unless-stopped
-```
-
-Запустить:
-```bash
-sudo docker compose up -d
-```
-
----
-
-### Проверка развертывания
-
-#### 1. Проверить статус контейнеров
-
-```bash
-# На каждой VM
-docker ps
-
-# Все контейнеры должны быть "healthy" или "Up"
-```
-
-#### 2. Проверить кластер ClickHouse
-
-```bash
-# Подключиться к любой ноде ClickHouse
-docker exec -it clickhouse-01 clickhouse-client
-
-# Проверить кластер
-SELECT * FROM system.clusters WHERE cluster = 'dwh_cluster';
-
-# Должно показать 3 реплики в 1 шарде
-```
-
-#### 3. Проверить ZooKeeper
-
-```bash
-# На любой ноде ZooKeeper
-docker exec -it zookeeper-01 zkServer.sh status
-
-# Должно показать "Mode: follower" или "Mode: leader"
-```
-
-#### 4. Проверить HAProxy
-
-```bash
-# Открыть в браузере
-http://<VM-7-IP>:8404
-
-# Должна открыться страница статистики HAProxy
-# Все backend серверы должны быть зелеными
-```
-
-#### 5. Тестовый запрос через HAProxy
-
-```bash
-# ETL endpoint
-curl "http://<VM-7-IP>:8080/?query=SELECT version()"
-
-# Analytics endpoint
-curl "http://<VM-7-IP>:8081/?query=SELECT version()"
-
-# Должно вернуть версию ClickHouse
-```
-
----
-
-## Управление пользователями и RBAC
+## Управление пользователями (RBAC)
 
 ### Концепция
 
-В кластере используется **SQL-based RBAC** (Role-Based Access Control) вместо XML конфигурации пользователей.
+В кластере используется **SQL-based Access Control** вместо XML конфигурации.
 
 **Преимущества**:
-- Динамическое управление пользователями без перезапуска
-- Гранулярные права на уровне таблиц/столбцов/строк
-- Репликация прав через ZooKeeper (применяются на всех нодах)
+- Создание пользователей без перезапуска ClickHouse
+- Гранулярные права (таблица, колонка, строка)
+- Репликация через ZooKeeper (команды `ON CLUSTER`)
+- Аудит всех изменений в `system.query_log`
 
 ### Начальная настройка
 
 **Пользователи в users.xml** (только для bootstrap):
 
-| Пользователь | Пароль | Профиль | Права |
-|--------------|--------|---------|-------|
-| `default` | нет | default | localhost only, для внутренних нужд |
-| `admin` | admin_super_secure_2024 | admin_profile | Полные права + управление пользователями |
+```xml
+<users>
+    <default>
+        <password></password>
+        <networks><ip>127.0.0.1</ip></networks>
+        <!-- Только localhost, для внутренних нужд -->
+    </default>
+
+    <admin>
+        <password>CHANGE_ME_BEFORE_DEPLOY</password>
+        <networks><ip>::/0</ip></networks>
+        <profile>admin_profile</profile>
+        <access_management>1</access_management>
+        <!-- Полные права + управление пользователями -->
+    </admin>
+</users>
+```
 
 ⚠️ **ВАЖНО**: Изменить пароль `admin` сразу после развертывания!
 
-### Создание пользователей через RBAC
+### Создание ролей
 
-#### 1. Подключиться как admin
-
+Подключиться как admin:
 ```bash
-clickhouse-client -h <HAProxy-IP> --port 9090 --user admin --password admin_super_secure_2024
+clickhouse-client -h haproxy --port 9090 --user admin --password <password>
 ```
-
-#### 2. Создать роли
 
 **Роль для ETL (запись)**:
 ```sql
 CREATE ROLE etl_role ON CLUSTER dwh_cluster;
 
--- Права на создание таблиц
 GRANT CREATE TABLE ON *.* TO etl_role;
-
--- Права на INSERT
 GRANT INSERT ON *.* TO etl_role;
-
--- Права на SELECT (для проверки данных)
-GRANT SELECT ON *.* TO etl_role;
-
--- Права на системные таблицы
+GRANT SELECT ON *.* TO etl_role;  -- Для проверки данных
 GRANT SELECT ON system.* TO etl_role;
 ```
 
@@ -849,32 +506,31 @@ GRANT SELECT ON system.* TO etl_role;
 ```sql
 CREATE ROLE analytics_role ON CLUSTER dwh_cluster;
 
--- Только SELECT
 GRANT SELECT ON *.* TO analytics_role;
-
--- Системные таблицы
 GRANT SELECT ON system.* TO analytics_role;
 ```
 
-**Роль для отчетов (чтение + тяжелые запросы)**:
+**Роль для отчетов (тяжелые запросы)**:
 ```sql
 CREATE ROLE reports_role ON CLUSTER dwh_cluster;
 
--- SELECT с возможностью создавать временные таблицы
 GRANT SELECT ON *.* TO reports_role;
 GRANT CREATE TEMPORARY TABLE ON *.* TO reports_role;
-
--- Системные таблицы
 GRANT SELECT ON system.* TO reports_role;
 ```
 
-#### 3. Создать пользователей
+### Создание пользователей
 
 **ETL пользователь**:
 ```sql
 CREATE USER etl_user ON CLUSTER dwh_cluster
-IDENTIFIED WITH sha256_password BY 'secure_etl_password_2024'
-SETTINGS PROFILE 'default';
+IDENTIFIED WITH sha256_password BY 'strong_password_here'
+SETTINGS
+    max_memory_usage = 50000000000,      -- 50 GB
+    max_execution_time = 3600,           -- 1 час
+    max_insert_threads = 16,
+    async_insert = 1,
+    max_threads = 32;
 
 GRANT etl_role TO etl_user ON CLUSTER dwh_cluster;
 ```
@@ -882,11 +538,12 @@ GRANT etl_role TO etl_user ON CLUSTER dwh_cluster;
 **Analytics пользователь**:
 ```sql
 CREATE USER analytics_user ON CLUSTER dwh_cluster
-IDENTIFIED WITH sha256_password BY 'secure_analytics_password_2024'
-SETTINGS PROFILE 'default',
-         readonly = 1,
-         max_execution_time = 300,
-         max_memory_usage = 10000000000;
+IDENTIFIED WITH sha256_password BY 'strong_password_here'
+SETTINGS
+    readonly = 1,
+    max_memory_usage = 10000000000,      -- 10 GB
+    max_execution_time = 300,            -- 5 минут
+    max_threads = 16;
 
 GRANT analytics_role TO analytics_user ON CLUSTER dwh_cluster;
 ```
@@ -894,239 +551,110 @@ GRANT analytics_role TO analytics_user ON CLUSTER dwh_cluster;
 **Reports пользователь**:
 ```sql
 CREATE USER reports_user ON CLUSTER dwh_cluster
-IDENTIFIED WITH sha256_password BY 'secure_reports_password_2024'
-SETTINGS PROFILE 'default',
-         readonly = 1,
-         max_execution_time = 1800,
-         max_memory_usage = 30000000000,
-         max_threads = 24;
+IDENTIFIED WITH sha256_password BY 'strong_password_here'
+SETTINGS
+    readonly = 1,
+    max_memory_usage = 30000000000,      -- 30 GB
+    max_execution_time = 1800,           -- 30 минут
+    max_threads = 24,
+    max_bytes_in_join = 10000000000;
 
 GRANT reports_role TO reports_user ON CLUSTER dwh_cluster;
 ```
 
-#### 4. Проверить пользователей
+### Проверка
 
 ```sql
 -- Список пользователей
-SELECT name, auth_type, host_ip, default_roles_list
-FROM system.users;
+SHOW USERS;
 
--- Список ролей
-SELECT name, granted_role_name
-FROM system.role_grants;
+-- Права пользователя
+SHOW GRANTS FOR etl_user;
 
--- Права роли
-SHOW GRANTS FOR etl_role;
-```
-
-### Профили настройки (Settings Profiles)
-
-Для управления лимитами создать профили через SQL:
-
-```sql
--- Профиль для ETL
-CREATE SETTINGS PROFILE etl_settings ON CLUSTER dwh_cluster
-SETTINGS
-    max_memory_usage = 50000000000,           -- 50 GB
-    max_execution_time = 3600,                -- 1 час
-    max_insert_threads = 16,
-    async_insert = 1,
-    async_insert_threads = 8,
-    max_threads = 32,
-    priority = 1;
-
--- Профиль для Analytics
-CREATE SETTINGS PROFILE analytics_settings ON CLUSTER dwh_cluster
-SETTINGS
-    max_memory_usage = 10000000000,           -- 10 GB
-    max_execution_time = 300,                 -- 5 минут
-    max_threads = 16,
-    readonly = 1,
-    priority = 3;
-
--- Профиль для Reports
-CREATE SETTINGS PROFILE reports_settings ON CLUSTER dwh_cluster
-SETTINGS
-    max_memory_usage = 30000000000,           -- 30 GB
-    max_execution_time = 1800,                -- 30 минут
-    max_threads = 24,
-    max_bytes_in_join = 10000000000,
-    readonly = 1,
-    priority = 5;
-```
-
-Применить профили к пользователям:
-```sql
-ALTER USER etl_user ON CLUSTER dwh_cluster
-SETTINGS PROFILE 'etl_settings';
-
-ALTER USER analytics_user ON CLUSTER dwh_cluster
-SETTINGS PROFILE 'analytics_settings';
-
-ALTER USER reports_user ON CLUSTER dwh_cluster
-SETTINGS PROFILE 'reports_settings';
-```
-
-### Квоты (Quotas)
-
-Ограничение нагрузки на уровне пользователей:
-
-```sql
--- Квота для Analytics (много легких запросов)
-CREATE QUOTA analytics_quota ON CLUSTER dwh_cluster
-FOR INTERVAL 1 hour MAX queries = 10000,
-                         errors = 100,
-                         execution_time = 36000;  -- 10 часов суммарно
-
-ALTER USER analytics_user ON CLUSTER dwh_cluster
-QUOTA 'analytics_quota';
-
--- Квота для Reports (мало тяжелых запросов)
-CREATE QUOTA reports_quota ON CLUSTER dwh_cluster
-FOR INTERVAL 1 hour MAX queries = 100,
-                         errors = 10,
-FOR INTERVAL 1 day MAX queries = 500,
-                        errors = 50;
-
-ALTER USER reports_user ON CLUSTER dwh_cluster
-QUOTA 'reports_quota';
-```
-
-### Row-level Security (RLS)
-
-Ограничение доступа к строкам (например, по тенантам):
-
-```sql
--- Создать политику: пользователь видит только свои данные
-CREATE ROW POLICY tenant_isolation ON events
-FOR SELECT USING tenant_id = currentUser() TO analytics_user;
-
--- Применяется автоматически при SELECT
+-- Активные сессии
+SELECT user, query_id, query, elapsed
+FROM system.processes;
 ```
 
 ---
 
-## Мониторинг
+## Мониторинг и метрики
 
 ### Grafana Dashboards
 
-После развертывания импортировать готовые дашборды:
+**Доступ**: `http://<VM-7-IP>:3000`
+**Login**: `admin` / `admin123` (изменить после первого входа!)
 
-1. Открыть Grafana: `http://<VM-7-IP>:3000`
-2. Login: `admin` / `admin123`
-3. Импортировать дашборды:
-   - ClickHouse Overview: ID `14192`
-   - ClickHouse Query Analysis: ID `14999`
-   - HAProxy: ID `12693`
+**Рекомендуемые дашборды** (импортировать по ID):
+- **ClickHouse Overview**: ID `14192`
+- **ClickHouse Query Analysis**: ID `14999`
+- **HAProxy**: ID `12693`
 
-### Ключевые метрики для мониторинга
-
-#### ClickHouse Metrics
+### Ключевые метрики
 
 **Производительность**:
-- `ClickHouseMetrics_Query` - текущее количество запросов
-- `ClickHouseProfileEvents_Query` - всего запросов (счетчик)
-- `ClickHouseProfileEvents_InsertedRows` - вставлено строк
-- `ClickHouseProfileEvents_SelectQuery` - SELECT запросов
+```promql
+# Запросов в секунду
+rate(ClickHouseProfileEvents_Query[1m])
 
-**Ресурсы**:
-- `ClickHouseMetrics_MemoryTracking` - использование памяти
-- `ClickHouseMetrics_BackgroundPoolTask` - активных background задач
-- `ClickHouseMetrics_BackgroundMergesAndMutationsPoolTask` - активных merge операций
+# INSERT строк в секунду
+rate(ClickHouseProfileEvents_InsertedRows[1m])
 
-**Репликация**:
-- `ClickHouseMetrics_ReplicatedFetch` - копирование частей с других реплик
-- `ClickHouseMetrics_ReplicatedSend` - отправка частей на другие реплики
-- `ClickHouseMetrics_ReplicationQueue` - размер очереди репликации
-
-**Ошибки**:
-- `ClickHouseProfileEvents_FailedQuery` - проваленных запросов
-- `ClickHouseProfileEvents_FailedInsertQuery` - проваленных INSERT
-- `ClickHouseProfileEvents_FailedSelectQuery` - проваленных SELECT
-
-#### HAProxy Metrics
-
-- Backend status (up/down)
-- Requests per second
-- Response time (percentiles)
-- Error rate
-- Active connections
-
-#### ZooKeeper Metrics
-
-- Outstanding requests
-- Watch count
-- Latency (avg/max)
-- Leader election count
-
-### Alerting Rules
-
-**Prometheus alerts** (пример):
-
-```yaml
-# /opt/prometheus/config/alerts.yml
-groups:
-  - name: clickhouse
-    interval: 30s
-    rules:
-      - alert: ClickHouseDown
-        expr: up{job="clickhouse"} == 0
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          summary: "ClickHouse node {{ $labels.instance }} is down"
-
-      - alert: ClickHouseHighMemoryUsage
-        expr: ClickHouseMetrics_MemoryTracking > 100000000000
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "ClickHouse {{ $labels.instance }} high memory usage"
-
-      - alert: ClickHouseReplicationLag
-        expr: ClickHouseMetrics_ReplicationQueue > 100
-        for: 10m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Replication lag on {{ $labels.instance }}"
-
-      - alert: ClickHouseFailedQueries
-        expr: rate(ClickHouseProfileEvents_FailedQuery[5m]) > 10
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High failed query rate on {{ $labels.instance }}"
+# SELECT запросов в секунду
+rate(ClickHouseProfileEvents_SelectQuery[1m])
 ```
 
-### Логирование
+**Ресурсы**:
+```promql
+# Использование памяти (байты)
+ClickHouseMetrics_MemoryTracking
 
-**ClickHouse logs**:
-- Location: `/var/log/clickhouse-server/`
-- `clickhouse-server.log` - основной лог
-- `clickhouse-server.err.log` - только ошибки
-- Rotation: 10 файлов по 1 GB
+# Активные background задачи
+ClickHouseMetrics_BackgroundPoolTask
 
-**Query log**:
+# Активные merges
+ClickHouseMetrics_BackgroundMergesAndMutationsPoolTask
+```
+
+**Репликация**:
+```promql
+# Размер очереди репликации
+ClickHouseMetrics_ReplicationQueue
+
+# Fetch операций (копирование частей)
+ClickHouseMetrics_ReplicatedFetch
+```
+
+**Ошибки**:
+```promql
+# Проваленные запросы в секунду
+rate(ClickHouseProfileEvents_FailedQuery[1m])
+
+# Проваленные INSERT
+rate(ClickHouseProfileEvents_FailedInsertQuery[1m])
+```
+
+### Query Log анализ
+
+**Медленные запросы (>10 сек)**:
 ```sql
--- Медленные запросы (>10 сек)
 SELECT
     query_start_time,
     query_duration_ms / 1000 as duration_sec,
     user,
     query,
     read_rows,
-    read_bytes
+    formatReadableSize(read_bytes) as read_size,
+    formatReadableSize(memory_usage) as memory
 FROM system.query_log
 WHERE type = 'QueryFinish'
   AND query_duration_ms > 10000
 ORDER BY query_start_time DESC
 LIMIT 100;
+```
 
--- Проваленные запросы
+**Проваленные запросы**:
+```sql
 SELECT
     query_start_time,
     user,
@@ -1140,118 +668,101 @@ LIMIT 100;
 
 ---
 
-## Производительность
+## Производительность и оптимизация
 
-### Оценка пропускной способности
+### Пропускная способность
 
-**На основе конфигурации Варианта 3**:
+**На основе вашей конфигурации (16-32 cores, 64-128 GB RAM)**:
 
-#### INSERT (через порт 8080 → Node-01)
-- **Простые таблицы**: 2-5M строк/сек
-- **Сложные таблицы** (много индексов, материализованные столбцы): 500K-2M строк/сек
-- **Batch size**: Рекомендуется 1M-10M строк за запрос
-- **Async insert**: Автоматический батчинг до 100 MB
-
-#### SELECT (через порт 8081 → все ноды)
-- **Простые агрегации** (COUNT, SUM по индексу): <100ms
-- **Сложные агрегации** (GROUP BY по 10+ колонкам): 1-10 сек
-- **Full scan** (без индексов): ~10B строк/сек на ноду
-- **Параллельные запросы**: до 300-500 одновременно
-
-#### JOIN (через порт 8082 → Node-02/03)
-- **Small JOIN** (<1M строк): <1 сек
-- **Medium JOIN** (1M-100M строк): 1-10 сек
-- **Large JOIN** (100M-1B строк): 10-60 сек
-- **Huge JOIN** (>1B строк): 1-10 минут
+| Операция | Производительность | Примечания |
+|----------|-------------------|------------|
+| **INSERT** (простые таблицы) | 2-5M строк/сек | Через ETL endpoint (8080) |
+| **INSERT** (сложные таблицы) | 500K-2M строк/сек | С индексами, материализованными колонками |
+| **SELECT** (простые агрегации) | <100ms | COUNT, SUM по индексу |
+| **SELECT** (сложные агрегации) | 1-10 сек | GROUP BY по 10+ колонкам |
+| **Full scan** | ~10B строк/сек | На одну ноду, без индексов |
+| **Параллельные запросы** | 300-500 | Analytics endpoint (8081) |
+| **JOIN** (small) | <1 сек | <1M строк |
+| **JOIN** (large) | 10-60 сек | 100M-1B строк |
 
 ### Оптимизация таблиц
 
-**Рекомендуемые движки**:
+**Рекомендуемая структура**:
 
 ```sql
--- Для реплицируемых таблиц
 CREATE TABLE events ON CLUSTER dwh_cluster (
     event_date Date,
     event_time DateTime,
     user_id UInt64,
-    event_type String,
-    -- ...
+    event_type LowCardinality(String),
+    data String
 ) ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/events', '{replica}')
 PARTITION BY toYYYYMM(event_date)
 ORDER BY (event_date, user_id, event_time)
-SETTINGS
-    index_granularity = 8192,
-    min_bytes_for_wide_part = 10485760;  -- 10 MB
+SETTINGS index_granularity = 8192;
 ```
 
 **Best practices**:
-- **PARTITION BY**: По месяцам для больших таблиц, по дням для очень больших
+- **ENGINE**: `ReplicatedMergeTree` для всех таблиц в кластере
+- **PARTITION BY**:
+  - `toYYYYMM(date)` для таблиц 100M-1B строк
+  - `toYear(date)` для малых таблиц (<100M)
+  - `toMonday(date)` для очень больших таблиц (>1B)
 - **ORDER BY**: Часто фильтруемые колонки в начале
-- **Index granularity**: 8192 по умолчанию (меньше для малых строк, больше для широких)
-- **Compression**: ZSTD level 3 (баланс скорости и сжатия)
+- **LowCardinality**: Для колонок с <10K уникальных значений
+- **Compression**: ZSTD level 3 (по умолчанию в конфигах)
 
 ### Партиционирование
 
-**Стратегия для разных размеров таблиц**:
+**Стратегия для ваших таблиц**:
 
 | Размер таблицы | PARTITION BY | Причина |
 |----------------|--------------|---------|
-| <100M строк | `toYear(date)` | Не нужно дробить |
-| 100M-1B строк | `toYYYYMM(date)` | Баланс между кол-вом партиций и размером |
-| >1B строк | `toMonday(date)` или `toYYYYMM(date)` | Быстрое удаление старых данных |
+| 2B строк (2 большие таблицы) | `toYYYYMM(date)` | ~24 партиции за 2 года, легко удалять старые месяцы |
+| 50-200M строк | `toYYYYMM(date)` | Баланс между кол-вом партиций и размером |
+| <10M строк | `toYear(date)` | Не нужно дробить на месяцы |
 
-**Пример для 2B таблицы**:
+**Пример**:
 ```sql
-CREATE TABLE big_events ON CLUSTER dwh_cluster (
-    event_date Date,
-    -- ...
-) ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/big_events', '{replica}')
-PARTITION BY toYYYYMM(event_date)  -- ~24 партиции за 2 года
-ORDER BY (event_date, user_id);
+-- Для большой таблицы (2B строк)
+PARTITION BY toYYYYMM(event_date)
+
+-- Удаление старой партиции (целиком, очень быстро)
+ALTER TABLE events DROP PARTITION '202301';
 ```
 
-### Индексы
+### Skip Indexes
 
-**Skip indexes** для ускорения фильтрации:
+**Для ускорения фильтрации**:
 
 ```sql
--- Индекс по строковому полю
-ALTER TABLE events ON CLUSTER dwh_cluster
-ADD INDEX idx_event_type event_type TYPE set(100) GRANULARITY 4;
+-- Индекс по строковому полю (set)
+ALTER TABLE events ADD INDEX idx_event_type event_type TYPE set(100) GRANULARITY 4;
 
--- Индекс по диапазону
-ALTER TABLE events ON CLUSTER dwh_cluster
-ADD INDEX idx_user_id user_id TYPE minmax GRANULARITY 1;
+-- Bloom filter для LIKE запросов
+ALTER TABLE events ADD INDEX idx_url url TYPE bloom_filter GRANULARITY 4;
 
--- Bloom filter для поиска по строкам
-ALTER TABLE events ON CLUSTER dwh_cluster
-ADD INDEX idx_url url TYPE bloom_filter GRANULARITY 4;
+-- Materialize индекс (применяется к существующим данным)
+ALTER TABLE events MATERIALIZE INDEX idx_event_type;
 ```
 
 ---
 
 ## Резервное копирование
 
-### Стратегия backup
+### Стратегия 1: ClickHouse BACKUP (рекомендуется)
 
-#### 1. ClickHouse BACKUP (рекомендуется)
-
-**Полный бэкап кластера**:
+**Полный бэкап всех баз**:
 ```sql
--- На любой ноде
-BACKUP TABLE events, users, transactions
-TO Disk('backups', 'backup_2024_10_01.zip');
-
--- Или весь кластер
-BACKUP DATABASE dwh TO Disk('backups', 'full_backup_2024_10_01.zip');
+BACKUP DATABASE dwh TO Disk('backups', 'backup_2024_10_01.zip');
 ```
 
 **Восстановление**:
 ```sql
-RESTORE DATABASE dwh FROM Disk('backups', 'full_backup_2024_10_01.zip');
+RESTORE DATABASE dwh FROM Disk('backups', 'backup_2024_10_01.zip');
 ```
 
-**Автоматизация** (cron на VM-7):
+**Автоматизация** (cron на любой VM):
 ```bash
 #!/bin/bash
 # /opt/scripts/clickhouse_backup.sh
@@ -1259,7 +770,7 @@ RESTORE DATABASE dwh FROM Disk('backups', 'full_backup_2024_10_01.zip');
 DATE=$(date +%Y_%m_%d)
 BACKUP_NAME="backup_${DATE}.zip"
 
-clickhouse-client -h clickhouse-01 --port 9000 --user admin --password admin_super_secure_2024 --query \
+clickhouse-client -h haproxy --port 9090 --user admin --password <password> --query \
 "BACKUP DATABASE dwh TO Disk('backups', '${BACKUP_NAME}')"
 
 # Удалить бэкапы старше 7 дней
@@ -1271,93 +782,104 @@ find /backups -name "backup_*.zip" -mtime +7 -delete
 0 2 * * * /opt/scripts/clickhouse_backup.sh
 ```
 
-#### 2. ZooKeeper snapshot
+### Стратегия 2: Volume Snapshot
 
-**Автоматически создается ZooKeeper**, но можно форсировать:
+**Для VM в облаке** (AWS EBS, GCP Persistent Disk):
 ```bash
-docker exec zookeeper-01 zkServer.sh snapshot
-```
-
-Бэкапы хранятся в `/data/version-2/` внутри контейнера.
-
-#### 3. Volumes backup
-
-**Остановить контейнер и скопировать volume**:
-```bash
-# На VM-1
+# Остановить контейнер
 docker stop clickhouse-01
-docker run --rm -v clickhouse-01-data:/data -v /backups:/backup \
-  ubuntu tar czf /backup/clickhouse-01-volume-2024-10-01.tar.gz /data
+
+# Создать snapshot диска
+aws ec2 create-snapshot --volume-id vol-xxxxx --description "ClickHouse backup"
+
+# Запустить контейнер
 docker start clickhouse-01
 ```
 
 ### Disaster Recovery
 
 **Сценарий 1: Потеря одной ноды ClickHouse**
-1. Кластер продолжает работать (2 реплики остались)
+1. Кластер продолжает работать (2 ноды остались)
 2. Развернуть новую VM
 3. Запустить ClickHouse с той же конфигурацией
 4. Данные автоматически реплицируются с других нод
 
 **Сценарий 2: Потеря всех нод ClickHouse**
-1. Развернуть 3 новые VM
-2. Восстановить ZooKeeper (если он тоже потерян)
-3. На одной ноде восстановить из бэкапа:
+1. Восстановить ZooKeeper (если потерян)
+2. На одной ноде восстановить из бэкапа:
    ```sql
-   RESTORE DATABASE dwh FROM Disk('backups', 'latest_backup.zip');
+   RESTORE DATABASE dwh FROM Disk('backups', 'latest.zip');
    ```
-4. Запустить остальные ноды - данные реплицируются
+3. Запустить остальные ноды - данные реплицируются
 
 **Сценарий 3: Потеря ZooKeeper кворума**
 1. Если потеряны 2+ ноды ZK → кластер не работает
-2. Восстановить ноды ZK из snapshot
-3. Перезапустить ClickHouse ноды для переподключения
+2. Восстановить ZK из snapshot (`/data/version-2/`)
+3. Перезапустить ClickHouse ноды
 
 ---
 
 ## Troubleshooting
 
-### Проблемы с репликацией
+### Проблема: Реплики не синхронизируются
 
-**Симптом**: `system.replication_queue` растет
+**Симптом**: Данные есть на Node-01, но нет на Node-02/03
 
+**Диагностика**:
 ```sql
 -- Проверить очередь репликации
 SELECT
-    database,
-    table,
-    replica_name,
+    database, table,
     num_tries,
     last_exception
 FROM system.replication_queue
 WHERE num_tries > 10;
 
--- Принудительно синхронизировать реплику
-SYSTEM SYNC REPLICA events;
-
--- Очистить сломанную реплику (крайняя мера)
-SYSTEM DROP REPLICA 'replica_02' FROM TABLE events;
+-- Проверить статус реплик
+SELECT
+    database, table,
+    is_leader,
+    total_replicas,
+    active_replicas
+FROM system.replicas;
 ```
 
-### Проблемы с ZooKeeper
+**Решение**:
+```sql
+-- Принудительно синхронизировать
+SYSTEM SYNC REPLICA events;
 
-**Симптом**: "Coordination::Exception: Session expired"
+-- Если не помогает - пересоздать реплику
+SYSTEM DROP REPLICA 'replica_02' FROM TABLE events;
+-- На Node-02: пересоздать таблицу
+```
 
+### Проблема: ZooKeeper недоступен
+
+**Симптом**: `Coordination::Exception: Session expired`
+
+**Диагностика**:
 ```bash
 # Проверить статус ZK
 docker exec zookeeper-01 zkServer.sh status
 
-# Проверить подключения
-docker exec zookeeper-01 zkCli.sh -server localhost:2181 ls /clickhouse
-
-# Увеличить session timeout в config.xml
-<zookeeper>
-    <session_timeout_ms>60000</session_timeout_ms>  <!-- было 30000 -->
-</zookeeper>
+# Проверить подключение
+echo ruok | nc zookeeper-01 2181
+# Должно вернуть: imok
 ```
 
-### Медленные запросы
+**Решение**:
+```bash
+# Перезапустить ZK ноду
+docker restart zookeeper-01
 
+# Увеличить session timeout в config.xml
+<session_timeout_ms>60000</session_timeout_ms>  <!-- было 30000 -->
+```
+
+### Проблема: Медленные запросы
+
+**Диагностика**:
 ```sql
 -- Найти медленные запросы
 SELECT
@@ -1366,8 +888,7 @@ SELECT
     user,
     substring(query, 1, 100) as query_short,
     read_rows,
-    read_bytes,
-    memory_usage
+    formatReadableSize(read_bytes) as read_size
 FROM system.query_log
 WHERE type = 'QueryFinish'
   AND query_duration_ms > 5000
@@ -1378,87 +899,58 @@ LIMIT 20;
 SET send_logs_level = 'trace';
 ```
 
-### Переполнение диска
+**Решение**:
+- Добавить skip indexes
+- Оптимизировать ORDER BY в таблице
+- Добавить материализованные колонки
+- Увеличить `max_threads` для запроса
 
-```sql
--- Проверить размер таблиц
-SELECT
-    database,
-    table,
-    formatReadableSize(sum(bytes)) as size,
-    sum(rows) as rows
-FROM system.parts
-WHERE active
-GROUP BY database, table
-ORDER BY sum(bytes) DESC;
+### Проблема: Out of Memory
 
--- Удалить старые партиции
-ALTER TABLE events DROP PARTITION '202301';
-
--- Оптимизировать таблицу (осторожно, нагружает систему)
-OPTIMIZE TABLE events FINAL;
-```
-
-### HAProxy backend down
-
-```bash
-# Проверить статус
-curl http://<VM-7-IP>:8404
-
-# Проверить health check
-curl http://clickhouse-01:8123/ping
-
-# Проверить логи HAProxy
-docker logs haproxy
-
-# Вручную пометить сервер как UP
-echo "set server clickhouse_etl_http/clickhouse-01 state ready" | \
-  docker exec -i haproxy socat stdio /var/run/haproxy.sock
-```
-
-### Out of Memory
-
+**Диагностика**:
 ```sql
 -- Проверить использование памяти
 SELECT
     user,
-    sum(memory_usage) as total_memory,
+    formatReadableSize(sum(memory_usage)) as total_memory,
     count() as queries
 FROM system.processes
 GROUP BY user;
+```
 
+**Решение**:
+```sql
 -- Убить тяжелый запрос
 KILL QUERY WHERE query_id = 'xxx';
 
--- Увеличить лимит памяти (временно)
-SET max_memory_usage = 100000000000;  -- 100 GB
+-- Увеличить лимит для пользователя
+ALTER USER reports_user SETTINGS max_memory_usage = 50000000000;
 ```
 
----
+### Проблема: HAProxy backend DOWN
 
-## Сетевая безопасность
+**Диагностика**:
+```bash
+# Проверить HAProxy stats
+curl http://<VM-7-IP>:8404
 
-### Рекомендации
-
-1. **Изолировать внутреннюю сеть**:
-   - ClickHouse ноды, ZooKeeper - только внутренняя VLAN
-   - HAProxy - единственная точка входа извне
-
-2. **Ограничить доступ по IP**:
-```sql
--- Разрешить подключение только с определенных IP
-CREATE USER etl_user
-IDENTIFIED WITH sha256_password BY 'password'
-HOST IP '10.0.1.0/24', IP '10.0.2.0/24';
+# Проверить health check вручную
+curl http://clickhouse-01:8123/ping
 ```
 
-3. **SSL/TLS** (опционально):
-   - Настроить SSL сертификаты для ClickHouse
-   - Настроить HTTPS для HAProxy
+**Решение**:
+```bash
+# Проверить firewall
+sudo ufw status
 
-4. **VPN/Bastion**:
-   - Доступ к VM только через VPN или bastion host
-   - SSH ключи вместо паролей
+# Проверить ClickHouse работает
+docker ps
+docker logs clickhouse-01
+
+# Вручную поднять backend
+echo "set server clickhouse_etl_http/clickhouse-01 state ready" | \
+  docker exec -i haproxy socat stdio /var/run/haproxy.sock
+```
 
 ---
 
@@ -1466,21 +958,21 @@ HOST IP '10.0.1.0/24', IP '10.0.2.0/24';
 
 ### Вертикальное (scale up)
 
-**Увеличение ресурсов существующих VM**:
+Увеличение ресурсов существующих VM:
 - CPU: 32 → 64 cores
 - RAM: 128 → 256 GB
 - Disk: 2 TB → 4-8 TB
 
+**Когда**: Не хватает производительности на текущих нодах
+
 ### Горизонтальное (scale out)
 
-**Добавление новых шардов** (когда данных очень много):
+Добавление новых шардов (когда данных очень много):
 
-1. Создать новые VM (VM-8, VM-9, VM-10)
-2. Настроить как новый шард:
 ```xml
 <remote_servers>
     <dwh_cluster>
-        <!-- Существующий шард -->
+        <!-- Существующий шард-1 -->
         <shard>
             <internal_replication>true</internal_replication>
             <replica><host>clickhouse-01</host></replica>
@@ -1488,7 +980,7 @@ HOST IP '10.0.1.0/24', IP '10.0.2.0/24';
             <replica><host>clickhouse-03</host></replica>
         </shard>
 
-        <!-- Новый шард -->
+        <!-- Новый шард-2 -->
         <shard>
             <internal_replication>true</internal_replication>
             <replica><host>clickhouse-04</host></replica>
@@ -1499,19 +991,26 @@ HOST IP '10.0.1.0/24', IP '10.0.2.0/24';
 </remote_servers>
 ```
 
-3. Пересоздать таблицы с `Distributed` движком:
+Пересоздать таблицы с `Distributed` движком:
 ```sql
 CREATE TABLE events_distributed ON CLUSTER dwh_cluster AS events
 ENGINE = Distributed(dwh_cluster, default, events, rand());
 ```
 
+**Когда**: Данных >20 TB, нужна горизонтальная партиционированность
+
 ---
 
-## Контакты и поддержка
+## Ссылки и поддержка
 
-**Документация ClickHouse**: https://clickhouse.com/docs
-**Community Slack**: https://clickhouse.com/slack
-**GitHub Issues**: https://github.com/ClickHouse/ClickHouse/issues
+**Документация**:
+- ClickHouse: https://clickhouse.com/docs
+- HAProxy: https://www.haproxy.org/
+- Prometheus: https://prometheus.io/docs/
+
+**Community**:
+- ClickHouse Slack: https://clickhouse.com/slack
+- GitHub: https://github.com/ClickHouse/ClickHouse
 
 ---
 
@@ -1519,5 +1018,5 @@ ENGINE = Distributed(dwh_cluster, default, events, rand());
 
 | Версия | Дата | Изменения |
 |--------|------|-----------|
-| 1.0 | 2024-10-01 | Начальная версия документации |
-
+| 2.0 | 2024-10-01 | Переписана для production (убраны dev конфиги, фокус на VM deployment) |
+| 1.0 | 2024-10-01 | Начальная версия |
