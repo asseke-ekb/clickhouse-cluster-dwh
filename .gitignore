@@ -37,6 +37,7 @@ temp/
 .vscode/
 .idea/
 *.iml
+.claude/
 
 # ==================== OS ====================
 .DS_Store
