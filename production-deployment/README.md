@@ -36,9 +36,9 @@ production-deployment/
 
 | VM | Роль | CPU | RAM | Disk | IP |
 |----|------|-----|-----|------|-----|
-| VM-1 | ClickHouse-01 (Write) | 16-32 cores | 64-128 GB | 2-4 TB NVMe | `<заполнить>` |
-| VM-2 | ClickHouse-02 (Read) | 16-32 cores | 64-128 GB | 2-4 TB NVMe | `<заполнить>` |
-| VM-3 | ClickHouse-03 (Read) | 16-32 cores | 64-128 GB | 2-4 TB NVMe | `<заполнить>` |
+| VM-1 | ClickHouse-01 (Write) | 8-32 cores | 16-128 GB | 2-4 TB NVMe | `<заполнить>` |
+| VM-2 | ClickHouse-02 (Read) | 8-32 cores | 16-128 GB | 2-4 TB NVMe | `<заполнить>` |
+| VM-3 | ClickHouse-03 (Read) | 8-32 cores | 16-128 GB | 2-4 TB NVMe | `<заполнить>` |
 | VM-4 | ZooKeeper-01 | 4 cores | 8 GB | 100 GB SSD | `<заполнить>` |
 | VM-5 | ZooKeeper-02 | 4 cores | 8 GB | 100 GB SSD | `<заполнить>` |
 | VM-6 | ZooKeeper-03 | 4 cores | 8 GB | 100 GB SSD | `<заполнить>` |
