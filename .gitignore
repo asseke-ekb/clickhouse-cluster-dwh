@@ -4,10 +4,17 @@
 !.env.example
 config/users.xml
 production-deployment/shared-configs/users.xml
+production-deployment/shared-configs/ldap.xml
 secrets/
 *.secret
 *.key
 *.pem
+
+# ==================== Migration Data ====================
+migration/*.csv
+migration/*.tsv
+migration/data/
+migration/exports/
 
 # ==================== Logs ====================
 logs/

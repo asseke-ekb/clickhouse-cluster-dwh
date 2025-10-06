@@ -177,13 +177,10 @@ OS: Ubuntu 22.04 LTS
 **DNS/Hosts**:
 Все хосты должны резолвиться по именам (через `/etc/hosts` или DNS):
 ```
-<VM-1-IP>  clickhouse-01
-<VM-2-IP>  clickhouse-02
-<VM-3-IP>  clickhouse-03
-<VM-4-IP>  zookeeper-01
-<VM-5-IP>  zookeeper-02
-<VM-6-IP>  zookeeper-03
-<VM-7-IP>  haproxy prometheus grafana
+192.168.9.110  clickhouse-01 zookeeper-01 DWH-ISS-CH-01
+192.168.9.111  clickhouse-02 zookeeper-02 DWH-ISS-CH-02
+192.168.9.112  clickhouse-03 zookeeper-03 DWH-ISS-CH-03
+192.168.9.113  haproxy prometheus grafana DWH-ISS-INFRA-01
 ```
 
 ---
@@ -453,13 +450,27 @@ check inter 2000 rise 2 fall 3
 
 ### Концепция
 
-В кластере используется **SQL-based Access Control** вместо XML конфигурации.
+В кластере используется **SQL-based Access Control** с поддержкой LDAP аутентификации.
 
 **Преимущества**:
 - Создание пользователей без перезапуска ClickHouse
 - Гранулярные права (таблица, колонка, строка)
 - Репликация через ZooKeeper (команды `ON CLUSTER`)
 - Аудит всех изменений в `system.query_log`
+- **LDAP Integration**: вход через доменные учетки Active Directory
+
+### Варианты аутентификации
+
+**1. Локальные пользователи** (для ETL и служебных процессов):
+- Создаются через SQL (`CREATE USER`)
+- Пароли хранятся в ClickHouse
+- Подходит для автоматизированных процессов
+
+**2. LDAP/Active Directory** (для аналитиков и пользователей):
+- Авторизация через доменные учетки
+- Роли назначаются автоматически по группам AD
+- Централизованное управление доступом
+- **См. подробную инструкцию**: [LDAP_SETUP.md](production-deployment/LDAP_SETUP.md)
 
 ### Начальная настройка
 
@@ -576,13 +587,52 @@ SELECT user, query_id, query, elapsed
 FROM system.processes;
 ```
 
+### LDAP интеграция для доменных пользователей
+
+Для подключения пользователей через Active Directory/LDAP:
+
+**Быстрый старт**:
+1. Создать группы в AD:
+   - `ClickHouse-Analytics` - для аналитиков (readonly, быстрые запросы)
+   - `ClickHouse-Reports` - для отчетов (readonly, тяжелые запросы)
+   - `ClickHouse-Admins` - для администраторов (полный доступ)
+
+2. Настроить LDAP в ClickHouse (файл `ldap.xml`):
+   ```bash
+   # См. подробную инструкцию
+   cat production-deployment/LDAP_SETUP.md
+   ```
+
+3. Создать роли в ClickHouse:
+   ```bash
+   clickhouse-client < production-deployment/shared-configs/ldap-roles.sql
+   ```
+
+4. Пользователи смогут входить с доменными учетками:
+   ```bash
+   clickhouse-client -h 192.168.9.113 --port 9090 \
+     -u "DOMAIN\username" --password "ad_password"
+   ```
+
+**Файлы конфигурации**:
+- [ldap.xml.example](production-deployment/shared-configs/ldap.xml.example) - шаблон LDAP конфигурации
+- [ldap-roles.sql](production-deployment/shared-configs/ldap-roles.sql) - SQL скрипт создания ролей
+- [LDAP_SETUP.md](production-deployment/LDAP_SETUP.md) - полная инструкция настройки
+
+**Автоматический маппинг ролей**:
+| AD группа | ClickHouse роль | Права |
+|-----------|-----------------|-------|
+| ClickHouse-Analytics | ROLE_ClickHouse_Analytics | SELECT, 10GB RAM, 5 мин |
+| ClickHouse-Reports | ROLE_ClickHouse_Reports | SELECT + VIEW, 30GB RAM, 30 мин |
+| ClickHouse-Admins | ROLE_ClickHouse_Admins | ALL + ACCESS MANAGEMENT |
+
 ---
 
 ## Мониторинг и метрики
 
 ### Grafana Dashboards
 
-**Доступ**: `http://<VM-7-IP>:3000`
+**Доступ**: `http://192.168.9.113:3000`
 **Login**: `admin` / `admin123` (изменить после первого входа!)
 
 **Рекомендуемые дашборды** (импортировать по ID):
@@ -932,7 +982,7 @@ ALTER USER reports_user SETTINGS max_memory_usage = 50000000000;
 **Диагностика**:
 ```bash
 # Проверить HAProxy stats
-curl http://<VM-7-IP>:8404
+curl http://192.168.9.113:8404
 
 # Проверить health check вручную
 curl http://clickhouse-01:8123/ping
