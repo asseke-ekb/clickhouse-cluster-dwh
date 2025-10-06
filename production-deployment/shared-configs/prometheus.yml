@@ -20,7 +20,7 @@ scrape_configs:
   # ==================== ClickHouse Nodes ====================
   - job_name: 'clickhouse-01'
     static_configs:
-      - targets: ['clickhouse-01:9363']
+      - targets: ['192.168.9.110:9363']
         labels:
           instance: 'clickhouse-01'
           role: 'etl-primary'
@@ -32,7 +32,7 @@ scrape_configs:
 
   - job_name: 'clickhouse-02'
     static_configs:
-      - targets: ['clickhouse-02:9363']
+      - targets: ['192.168.9.111:9363']
         labels:
           instance: 'clickhouse-02'
           role: 'analytics-reports'
@@ -44,7 +44,7 @@ scrape_configs:
 
   - job_name: 'clickhouse-03'
     static_configs:
-      - targets: ['clickhouse-03:9363']
+      - targets: ['192.168.9.112:9363']
         labels:
           instance: 'clickhouse-03'
           role: 'analytics-reports'
@@ -57,7 +57,7 @@ scrape_configs:
   # ==================== HAProxy Stats ====================
   - job_name: 'haproxy'
     static_configs:
-      - targets: ['haproxy:8404']
+      - targets: ['192.168.9.113:8404']
         labels:
           instance: 'haproxy-lb'
     metrics_path: '/metrics'
@@ -67,9 +67,9 @@ scrape_configs:
   - job_name: 'zookeeper'
     static_configs:
       - targets:
-        - 'zookeeper-01:7071'
-        - 'zookeeper-02:7071'
-        - 'zookeeper-03:7071'
+        - '192.168.9.110:7071'
+        - '192.168.9.111:7071'
+        - '192.168.9.112:7071'
         labels:
           service: 'zookeeper'
     scrape_interval: 15s

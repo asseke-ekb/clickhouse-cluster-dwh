@@ -1,0 +1,65 @@
+<clickhouse>
+    <!-- ==================== Users Configuration ==================== -->
+    <users>
+        <!-- Default user (только для локального доступа с VM) -->
+        <default>
+            <password></password>
+            <networks>
+                <ip>::1</ip>
+                <ip>127.0.0.1</ip>
+            </networks>
+            <profile>default</profile>
+            <quota>default</quota>
+        </default>
+
+        <!-- Admin user (полный доступ, управление пользователями через RBAC) -->
+        <!-- Пароль по умолчанию: admin (SHA256: 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918) -->
+        <!-- ОБЯЗАТЕЛЬНО смените пароль после развертывания! -->
+        <admin>
+            <password_sha256_hex>8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918</password_sha256_hex>
+            <networks>
+                <ip>192.168.9.0/24</ip>
+                <ip>::/0</ip>  <!-- Для подключения из DBeaver -->
+            </networks>
+            <profile>admin</profile>
+            <quota>default</quota>
+            <!-- Права для управления пользователями и ролями -->
+            <access_management>1</access_management>
+            <named_collection_control>1</named_collection_control>
+            <show_named_collections>1</show_named_collections>
+            <show_named_collections_secrets>1</show_named_collections_secrets>
+        </admin>
+    </users>
+
+    <!-- ==================== Profiles Configuration ==================== -->
+    <profiles>
+        <default>
+            <max_memory_usage>10000000000</max_memory_usage>
+            <use_uncompressed_cache>0</use_uncompressed_cache>
+            <load_balancing>random</load_balancing>
+            <max_execution_time>300</max_execution_time>
+        </default>
+
+        <admin>
+            <max_memory_usage>20000000000</max_memory_usage>
+            <use_uncompressed_cache>1</use_uncompressed_cache>
+            <load_balancing>random</load_balancing>
+            <max_execution_time>0</max_execution_time>  <!-- Без ограничений -->
+            <max_concurrent_queries_for_user>0</max_concurrent_queries_for_user>
+        </admin>
+    </profiles>
+
+    <!-- ==================== Quotas Configuration ==================== -->
+    <quotas>
+        <default>
+            <interval>
+                <duration>3600</duration>
+                <queries>0</queries>
+                <errors>0</errors>
+                <result_rows>0</result_rows>
+                <read_rows>0</read_rows>
+                <execution_time>0</execution_time>
+            </interval>
+        </default>
+    </quotas>
+</clickhouse>
