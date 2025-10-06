@@ -39,39 +39,43 @@
 
 ## Архитектура кластера
 
-### Диаграмма компонентов
+### Диаграмма компонентов (4 VM Architecture)
 
 ```
-                        ┌─────────────────┐
-                        │   HAProxy LB    │
-                        │  (VM-7)         │
-                        │  8080-82, 9090-91│
-                        └────────┬────────┘
-                                 │
-              ┌──────────────────┼──────────────────┐
-              │                  │                  │
-              ▼                  ▼                  ▼
-    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-    │ ClickHouse-01   │ │ ClickHouse-02   │ │ ClickHouse-03   │
-    │ (VM-1)          │ │ (VM-2)          │ │ (VM-3)          │
-    │ Write-heavy     │ │ Read-heavy      │ │ Read-heavy      │
-    │ replica_01      │ │ replica_02      │ │ replica_03      │
-    └────────┬────────┘ └────────┬────────┘ └────────┬────────┘
-             │                   │                   │
-             └───────────────────┼───────────────────┘
-                                 │
-                      ┌──────────┴──────────┐
-                      │  ZooKeeper Ensemble  │
-                      │  (VM-4, VM-5, VM-6)  │
-                      │  Quorum: 2 of 3      │
-                      └─────────────────────┘
-
-                      ┌─────────────────────┐
-                      │  Monitoring (VM-7)  │
-                      │  Prometheus:9099    │
-                      │  Grafana:3000       │
-                      └─────────────────────┘
+                        ┌─────────────────────────┐
+                        │   HAProxy LB (VM-4)     │
+                        │   192.168.9.113         │
+                        │   8080-82, 9090-91      │
+                        │   + Prometheus:9099     │
+                        │   + Grafana:3000        │
+                        └────────────┬────────────┘
+                                     │
+              ┌──────────────────────┼──────────────────────┐
+              │                      │                      │
+              ▼                      ▼                      ▼
+    ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+    │  VM-1 (110)      │  │  VM-2 (111)      │  │  VM-3 (112)      │
+    │ ┌──────────────┐ │  │ ┌──────────────┐ │  │ ┌──────────────┐ │
+    │ │ClickHouse-01 │ │  │ │ClickHouse-02 │ │  │ │ClickHouse-03 │ │
+    │ │ replica_01   │ │  │ │ replica_02   │ │  │ │ replica_03   │ │
+    │ │ Write-heavy  │ │  │ │ Read-heavy   │ │  │ │ Read-heavy   │ │
+    │ └──────┬───────┘ │  │ └──────┬───────┘ │  │ └──────┬───────┘ │
+    │        │         │  │        │         │  │        │         │
+    │ ┌──────┴───────┐ │  │ ┌──────┴───────┐ │  │ ┌──────┴───────┐ │
+    │ │ ZooKeeper-01 │ │  │ │ ZooKeeper-02 │ │  │ │ ZooKeeper-03 │ │
+    │ │ myid: 1      │ │  │ │ myid: 2      │ │  │ │ myid: 3      │ │
+    │ └──────────────┘ │  │ └──────────────┘ │  │ └──────────────┘ │
+    └──────────────────┘  └──────────────────┘  └──────────────────┘
+             │                      │                      │
+             └──────────────────────┴──────────────────────┘
+                        ZooKeeper Quorum (2 of 3)
 ```
+
+**Преимущества консолидированной архитектуры:**
+- ✅ Меньше VM (4 вместо 7) → экономия ресурсов
+- ✅ Локальность ClickHouse + ZooKeeper → меньше сетевой латенси
+- ✅ Упрощенное управление и мониторинг
+- ⚠️ Совместное использование ресурсов на VM-1, VM-2, VM-3
 
 ### Принцип работы
 
@@ -91,50 +95,46 @@
 
 ## Требования к инфраструктуре
 
-### Виртуальные машины (Production)
+### Виртуальные машины (Production - 4 VM Architecture)
 
-#### ClickHouse Nodes (VM-1, VM-2, VM-3)
+#### Комбинированные ноды (VM-1, VM-2, VM-3)
+
+**На каждой VM запущено 2 контейнера:**
+- 1× ClickHouse (основное потребление ресурсов)
+- 1× ZooKeeper (легковесный, ~2-4 GB RAM)
+
+| VM | IP | Hostname | Компоненты |
+|----|-------------|-----------------|------------|
+| VM-1 | 192.168.9.110 | DWH-ISS-CH-01 | ClickHouse-01 + ZooKeeper-01 |
+| VM-2 | 192.168.9.111 | DWH-ISS-CH-02 | ClickHouse-02 + ZooKeeper-02 |
+| VM-3 | 192.168.9.112 | DWH-ISS-CH-03 | ClickHouse-03 + ZooKeeper-03 |
 
 **Характеристики каждой VM**:
 ```yaml
 CPU: 16-32 cores (физических)
-RAM: 64-128 GB
+RAM: 64-128 GB (ClickHouse: 60-120 GB, ZooKeeper: 2-4 GB)
 Disk: 2-4 TB NVMe SSD (RAID10 рекомендуется)
 Network: 10 Gbps
 OS: Ubuntu 22.04 LTS / RHEL 8+
 ```
 
-**Расчет ресурсов под вашу нагрузку**:
+**Расчет ресурсов**:
 - Текущие данные: ~5B записей = 2.4 TB (с репликацией ×3)
 - Прирост: 1.5M-8M строк/день = ~840 GB/год (с репликацией)
 - **Рекомендация**: 2 TB на ноду хватит на 2-3 года
 
-**Обоснование ресурсов**:
-- **CPU 16-32 cores**: ClickHouse параллелизует запросы по ядрам
-- **RAM 64-128 GB**:
-  - Node-01: 90% для буферов INSERT и background merges
-  - Node-02/03: 85% для кэширования (mark cache 10GB + uncompressed cache 20GB)
-- **Disk 2-4 TB NVMe**:
-  - Высокая скорость записи для ETL
-  - Низкая latency для аналитических запросов
+**Распределение ресурсов на VM**:
+- **ClickHouse**: 90-95% RAM (mark cache + uncompressed cache + buffers)
+- **ZooKeeper**: 2-4 GB RAM (метаданные и сессии)
+- **Disk**:
+  - `/data/clickhouse` - основной объем (2-4 TB)
+  - `/data/zookeeper` - минимальный (100-500 GB)
 
-#### ZooKeeper Nodes (VM-4, VM-5, VM-6)
+#### Infrastructure Node (VM-4)
 
-**Характеристики каждой VM**:
-```yaml
-CPU: 4 cores
-RAM: 8 GB
-Disk: 100 GB SSD
-Network: 1 Gbps
-OS: Ubuntu 22.04 LTS / RHEL 8+
-```
-
-**Обоснование**:
-- ZooKeeper хранит только метаданные (KB-MB размер)
-- Требователен к latency диска (SSD обязательно)
-- 3 ноды = quorum (работает при падении 1 ноды)
-
-#### Infrastructure Node (VM-7)
+| VM | IP | Hostname | Компоненты |
+|----|-------------|-----------------|------------|
+| VM-4 | 192.168.9.113 | DWH-ISS-INFRA-01 | HAProxy + Prometheus + Grafana |
 
 **Характеристики**:
 ```yaml
@@ -161,18 +161,18 @@ OS: Ubuntu 22.04 LTS
 
 | VM | Порты | Назначение |
 |----|-------|------------|
-| VM-1,2,3 | 8123 | ClickHouse HTTP API |
+| VM-1,2,3 (Combined) | 8123 | ClickHouse HTTP API |
 | VM-1,2,3 | 9000 | ClickHouse Native protocol |
 | VM-1,2,3 | 9009 | ClickHouse Interserver (репликация) |
 | VM-1,2,3 | 9363 | Prometheus metrics |
-| VM-4,5,6 | 2181 | ZooKeeper client |
-| VM-4,5,6 | 2888 | ZooKeeper peer |
-| VM-4,5,6 | 3888 | ZooKeeper election |
-| VM-7 | 8080-8082 | HAProxy HTTP frontends |
-| VM-7 | 9090-9091 | HAProxy TCP frontends |
-| VM-7 | 8404 | HAProxy stats UI |
-| VM-7 | 9099 | Prometheus |
-| VM-7 | 3000 | Grafana |
+| VM-1,2,3 | 2181 | ZooKeeper Client port |
+| VM-1,2,3 | 2888 | ZooKeeper Peer communication |
+| VM-1,2,3 | 3888 | ZooKeeper Leader election |
+| VM-4 (Infra) | 8080-8082 | HAProxy HTTP frontends |
+| VM-4 | 9090-9091 | HAProxy TCP frontends |
+| VM-4 | 8404 | HAProxy stats page |
+| VM-4 | 9099 | Prometheus web UI |
+| VM-4 | 3000 | Grafana web UI |
 
 **DNS/Hosts**:
 Все хосты должны резолвиться по именам (через `/etc/hosts` или DNS):
